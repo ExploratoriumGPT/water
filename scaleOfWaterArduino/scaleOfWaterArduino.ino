@@ -5,6 +5,7 @@
 #include <AccelStepper.h>
 #include <Bounce2.h>
 #include <EEPROM.h>
+#include <git_info.h>
 
 #define STATE_ADDRESS 0
 //  Define pin numbers for stepper motor
@@ -80,6 +81,9 @@ void setupAllSteppers()
 
 void setup()
 {
+    #ifdef PLATFORMIO
+      gitPrint(); //prints git info to the serial monitor
+    #endif
     state = EEPROM.read(STATE_ADDRESS);
 
     // Set up the stepper motor
@@ -100,6 +104,8 @@ long millisToFillTank;
 long millisAtStartOfFill;
 long millisAtEndOfFill;
 long lastButtonPressTime;
+
+
 void loop()
 {
     littleStepper.run();
@@ -123,6 +129,16 @@ void loop()
         exhibitRoutine();
     }
     // calibrateSumpPump();
+}
+
+void gitPrint() { //prints git information to the serial monitor using the Streaming library
+  Serial << F("Git Information:\n")
+  << F("Build Date/Time (local time): ") << BUILD_DATE << F("\n")
+  << F("Builder's Name:  ") << GIT_USER_NAME << F(" Email: ") << GIT_USER_EMAIL  << F("\n")
+  << F("Repository URL: ") << GIT_REPO_URL << F("\n")
+  << F("Branch: ") << GIT_BRANCH << F(" | Tag: ") << GIT_TAG  << F("\n\n")
+  << F("Commit Hash: ") << GIT_COMMIT_HASH << F("\n") 
+  << F("\n=================================") << endl;
 }
 
 void calibrateSumpPump()
