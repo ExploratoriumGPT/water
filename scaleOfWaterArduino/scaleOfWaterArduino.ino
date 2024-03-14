@@ -8,13 +8,13 @@ TODO: add stepper drain code and peristaltic hardware for medium tank drain
 TODO: add code for lit pushbuttons, lite the button one is allowed to push only
 TODO: refactor code for ray stack and arduino mega
 TODO: write drain on boot code
-TODO: print to OLED screen instead of or in addtion to the Serial
-TODO: remove EEProm codse once boot drain is implemented
+TODO: print to OLED screen instead of or in addition to the Serial
+TODO: remove EEProm code once boot drain is implemented
 TODO: consider adding water level sensor to prevent flooding if drain issue on main tank
 
 System description:
 3x lit pushbuttons for each nozzle, to be lit and allowed to trigger in order of big to small
-lock out nex steps until the previous step is complete plus some golbal delay to prevent button mashing
+lock out nex steps until the previous step is complete plus some global delay to prevent button mashing
 
 
 */
@@ -35,8 +35,8 @@ const int bigPumpEnablePin = 12;
 const int drainBigTankRelayPin = A3;
 
 // Define pin number for button
-const int buttonPin = 9; //"limit x axis on sheild"
-// const int buttonPin = 11; //"limit Z axis on sheild"
+const int buttonPin = 9; //"limit x axis on shield"
+// const int buttonPin = 11; //"limit Z axis on shield"
 
 // Define steps per revolution and mLs per revolution
 const int stepsPerRev = 1600;           // with 8x microstepping (200 steps per rev)
@@ -236,7 +236,7 @@ void calibratePump(AccelStepper stepper, bool forward)
     int revs = 10;
     int steps = revs * stepsPerRev;
     Serial.print("Calibrating pump... ");
-    Serial.print("spinnging ");
+    Serial.print("spinning ");
     Serial.print(revs);
     Serial.print(" revs (");
     Serial.print(steps);
@@ -249,5 +249,5 @@ void calibratePump(AccelStepper stepper, bool forward)
         stepper.run();
     }
     digitalWrite(enablePin, HIGH); // turn them off to save power
-    Serial.println(" done. note volume dispenced and divide by 10 to get uL per rev");
+    Serial.println(" done. note volume dispensed and divide by 10 to get uL per rev");
 }
