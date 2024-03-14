@@ -1,21 +1,4 @@
 /*
-Test comment to see if pushing works
-Elon to draw a schematic
-Elon to review the code
-
-
-TODO: add stepper drain code and peristaltic hardware for medium tank drain
-TODO: add code for lit pushbuttons, lite the button one is allowed to push only
-TODO: refactor code for ray stack and arduino mega
-TODO: write drain on boot code
-TODO: print to OLED screen instead of or in addition to the Serial
-TODO: remove EEProm code once boot drain is implemented
-TODO: consider adding water level sensor to prevent flooding if drain issue on main tank
-
-System description:
-3x lit pushbuttons for each nozzle, to be lit and allowed to trigger in order of big to small
-lock out nex steps until the previous step is complete plus some global delay to prevent button mashing
-
 
 */
 
