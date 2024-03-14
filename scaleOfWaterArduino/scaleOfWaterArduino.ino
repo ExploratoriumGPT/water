@@ -1,26 +1,19 @@
-/*
+// Public libraries
+#include <Arduino.h> // Library for Arduino
+#include <AccelStepper.h> // Library for stepper motor
+#include <Bounce2.h>     // Library for debouncing button
+#include <EEPROM.h>     // Library for reading and writing to EEPROM
+#include <git_info.h>  // Library for printing git information
+// Local files
+#include <main.h> // Header file for scaleOfWaterArduino.ino
+#include <pins.h> // Header file for pin definitions
 
-*/
-
-#include <AccelStepper.h>
-#include <Bounce2.h>
-#include <EEPROM.h>
-#include <git_info.h>
+// Create instances of AccelStepper and Bounce objects
+AccelStepper littleStepper(AccelStepper::DRIVER, stepPinLittleStepper, dirPinLittleStepper);
+AccelStepper bigStepper(AccelStepper::DRIVER, stepPinBigStepper, dirPinBigStepper);
 
 #define STATE_ADDRESS 0
-//  Define pin numbers for stepper motor
-//  https://blog.protoneer.co.nz/arduino-cnc-shield/ old shield
-const int stepPinLittleStepper = 2; // X axis on board
-const int dirPinLittleStepper = 5;
-const int stepPinBigStepper = 4;
-const int dirPinBigStepper = 7; // Z axis on board
-const int enablePin = 8;
-const int bigPumpEnablePin = 12;
-const int drainBigTankRelayPin = A3;
 
-// Define pin number for button
-const int buttonPin = 9; //"limit x axis on shield"
-// const int buttonPin = 11; //"limit Z axis on shield"
 
 // Define steps per revolution and mLs per revolution
 const int stepsPerRev = 1600;           // with 8x microstepping (200 steps per rev)
@@ -43,9 +36,6 @@ int state = 1;
 bool isTimeout = false;
 bool mediumTankFull = false;
 bool bigTankFull = false;
-// Create instances of AccelStepper and Bounce objects
-AccelStepper littleStepper(AccelStepper::DRIVER, stepPinLittleStepper, dirPinLittleStepper);
-AccelStepper bigStepper(AccelStepper::DRIVER, stepPinBigStepper, dirPinBigStepper);
 
 Bounce button = Bounce();
 
