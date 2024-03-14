@@ -3,17 +3,19 @@
 #include <AccelStepper.h> // Library for stepper motor
 #include <Bounce2.h>     // Library for debouncing button
 #include <EEPROM.h>     // Library for reading and writing to EEPROM
-#include <git_info.h>  // Library for printing git information
+#include <Streaming.h> // Library for printing in streaming method
+#ifdef PLATFORMIO
+  #include <git_info.h>  // Library for printing git information
+#endif
 // Local files
-#include <main.h> // Header file for scaleOfWaterArduino.ino
-#include <pins.h> // Header file for pin definitions
+#include "libraries/include/main.h" // Header file for scaleOfWaterArduino.ino
+#include "libraries/include/pins.h" // Header file for pin definitions
 
 // Create instances of AccelStepper and Bounce objects
 AccelStepper littleStepper(AccelStepper::DRIVER, stepPinLittleStepper, dirPinLittleStepper);
 AccelStepper bigStepper(AccelStepper::DRIVER, stepPinBigStepper, dirPinBigStepper);
 
 #define STATE_ADDRESS 0
-
 
 // Define steps per revolution and mLs per revolution
 const int stepsPerRev = 1600;           // with 8x microstepping (200 steps per rev)
@@ -121,6 +123,7 @@ void loop()
     // calibrateSumpPump();
 }
 
+#ifdef PLATFORMIO
 void gitPrint() { //prints git information to the serial monitor using the Streaming library
   Serial << F("Git Information:\n")
   << F("Build Date/Time (local time): ") << BUILD_DATE << F("\n")
@@ -130,6 +133,7 @@ void gitPrint() { //prints git information to the serial monitor using the Strea
   << F("Commit Hash: ") << GIT_COMMIT_HASH << F("\n") 
   << F("\n=================================") << endl;
 }
+#endif
 
 void calibrateSumpPump()
 {
