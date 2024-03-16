@@ -47,12 +47,7 @@ void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev
     digitalWrite(enablePin, LOW);
     // Calculate the number of steps required to dispense the specified uL
     int steps = round((float)uL / uLsPerRev * stepsPerRev);
-    Serial.print("Dispensing ");
-    Serial.print(uL);
-    Serial.print(" uL (");
-    Serial.print(steps);
-    Serial.print(" steps) ");
-    Serial.print(forward ? "forwards... " : "backwards... ");
+    Serial << "Dispensing " << uL << " uL (" << steps << " steps) " << (forward ? "forwards... " : "backwards... ") << endl;
     stepper.move(forward ? -steps : steps);
     // Run the stepper motor until it reaches the target position ////blocking code
     while (stepper.distanceToGo() != 0)
@@ -141,28 +136,27 @@ void calibrateSumpPump()
     {
         digitalWrite(bigPumpEnablePin, HIGH);
         millisAtStartOfFill = millis();
-        Serial.println("button down!");
+        Serial << "button down!" << endl;
     }
     else if (button.rose())
     {
         digitalWrite(bigPumpEnablePin, LOW);
         millisAtEndOfFill = millis();
         millisToFillTank = millisAtEndOfFill - millisAtStartOfFill;
-        Serial.print("millisToFillTank: ");
-        Serial.println(millisToFillTank);
+        Serial << "millisToFillTank: " << millisToFillTank << endl;
     }
 }
 
 void timeout()
 {
-    Serial.print("timeout, draining tank...");
+    Serial << "timeout, draining tank..." << endl;
     // reset medium tank
     stepperDispense(bigStepper, 53895, false, uLsPerRevBigStepper, maxSpeedBigStepper); ///////////////////////////
-    Serial.print("medium tank empty");
+    Serial << "medium tank empty" << endl;
     digitalWrite(bigPumpEnablePin, HIGH);
     delay(bigTankDrainDuration);
     digitalWrite(bigPumpEnablePin, LOW);
-    Serial.print("big tank empty");
+    Serial << "big tank empty" << endl;
     state = 0;
     EEPROM.write(STATE_ADDRESS, state);
     isTimeout = true;
@@ -173,15 +167,14 @@ void timeout()
 void exhibitRoutine()
 {
     {
-        Serial.print("Button pressed!");
-        Serial.print("Current state: ");
-        Serial.println(state);
+        Serial << "Button pressed!";
+        Serial << "Current state: " << state << endl;
 
         if (state == 1)
         {
             if (mediumTankFull) // if there is still water in the medium tank then timeout to drain
             {
-                Serial.print(" BUTTON BASED RESET, DRAINING TANK");
+                Serial << " BUTTON BASED RESET, DRAINING TANK";
                 timeout();
                 state = 0;
             }
@@ -197,14 +190,14 @@ void exhibitRoutine()
             // spurt 53mL into the little tank
             stepperDispense(bigStepper, 53895, true, uLsPerRevBigStepper, maxSpeedBigStepper);
             mediumTankFull = true;
-            Serial.println("bigStepper drip dropped");
-        }
-        else if (state == 3)
-        {
-            // spurt 0.65mL into user's hands
-            stepperDispense(littleStepper, 647, true, uLsPerRevLittleStepper, maxSpeedLittleStepper);
-            Serial.println("littleStepper drip dropped");
-            state = 0;
+                Serial << "bigStepper drip dropped" << endl;
+            }
+            else if (state == 3)
+            {
+                // spurt 0.65mL into user's hands
+                stepperDispense(littleStepper, 647, true, uLsPerRevLittleStepper, maxSpeedLittleStepper);
+                Serial << "littleStepper drip dropped" << endl;
+                state = 0;
         }
 
         state = state + 1;
@@ -214,13 +207,11 @@ void exhibitRoutine()
 
 void sumpPumpDispense(int mLs)
 {
-    Serial.print("Dispensing ");
-    Serial.print(mLs);
-    Serial.print(" mLs sump pump... ");
+    Serial << "Dispensing " << mLs << " mLs sump pump... " << endl;
     digitalWrite(bigPumpEnablePin, HIGH);
     delay(mLs / mLsPerSecondSumpPump * 1000);
     digitalWrite(bigPumpEnablePin, LOW);
-    Serial.println(" done");
+    Serial << " done" << endl;
     bigTankFull = true;
 }
 
@@ -228,13 +219,8 @@ void calibratePump(AccelStepper stepper, bool forward)
 {
     int revs = 10;
     int steps = revs * stepsPerRev;
-    Serial.print("Calibrating pump... ");
-    Serial.print("spinning ");
-    Serial.print(revs);
-    Serial.print(" revs (");
-    Serial.print(steps);
-    Serial.print(" steps) ");
-    Serial.print(forward ? "forwards... " : "backwards... ");
+    Serial << "Calibrating pump... " << "spinning " << revs << " revs (" << steps << " steps) " 
+    << (forward ? "forwards... " : "backwards... ") << endl;
     digitalWrite(enablePin, LOW);
     stepper.move(forward ? -steps : steps);
     while (stepper.distanceToGo() != 0)
@@ -242,5 +228,5 @@ void calibratePump(AccelStepper stepper, bool forward)
         stepper.run();
     }
     digitalWrite(enablePin, HIGH); // turn them off to save power
-    Serial.println(" done. note volume dispensed and divide by 10 to get uL per rev");
+    Serial << " done. note volume dispensed and divide by 10 to get uL per rev" << endl;
 }
