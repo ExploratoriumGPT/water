@@ -22,7 +22,7 @@ const int stepsPerRev = 1600;           // with 8x microstepping (200 steps per 
 const int uLsPerRevLittleStepper = 422; // 3.56mL per 10
 const int uLsPerRevBigStepper = 3190;   /////////////////////////////////////// 3,6mL per rev
 
-const int mLsPerSecondSumpPump = 420;
+const int mLsPerSecondSumpPump = 420; 
 
 // Define maximum speed and acceleration
 const int maxSpeedLittleStepper = 8 * 560000; // 350*1600 per datasheet;
@@ -48,7 +48,7 @@ void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev
     // Calculate the number of steps required to dispense the specified uL
     int steps = round((float)uL / uLsPerRev * stepsPerRev);
     Serial << "Dispensing " << uL << " uL (" << steps << " steps) " << (forward ? "forwards... " : "backwards... ") << endl;
-    stepper.move(forward ? -steps : steps);
+    stepper.move(forward ? -steps : steps); // Move the stepper motor forward or backward by the specified number of steps
     // Run the stepper motor until it reaches the target position ////blocking code
     while (stepper.distanceToGo() != 0)
     {
@@ -57,6 +57,7 @@ void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev
     digitalWrite(enablePin, HIGH); // turn them off to save power
     Serial.println(" done");
 }
+
 void setupAllSteppers()
 {
     pinMode(enablePin, OUTPUT);
