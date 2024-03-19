@@ -8,6 +8,7 @@ void calibrateSumpPump();
 void timeout();
 void exhibitRoutine();
 void sumpPumpDispense(int mLs);
+void drainTanks();
 //void calibratePump();
 
 

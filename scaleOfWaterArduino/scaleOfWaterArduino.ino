@@ -13,6 +13,7 @@
 // Create instances of AccelStepper and Bounce objects
 AccelStepper littleStepper(AccelStepper::DRIVER, stepPinLittleStepper, dirPinLittleStepper);
 AccelStepper bigStepper(AccelStepper::DRIVER, stepPinBigStepper, dirPinBigStepper);
+AccelStepper drainStepper(AccelStepper::DRIVER, stepPinDrainStepper, dirPinDrainStepper);
 
 // Define steps per revolution and mLs per revolution
 const int stepsPerRev = 1600;           // with 8x microstepping (200 steps per rev)
@@ -26,11 +27,12 @@ const int maxSpeedLittleStepper = 8 * 560000; // 350*1600 per datasheet;
 const int maxAccelerationLittleStepper = maxSpeedLittleStepper;
 const int maxSpeedBigStepper = maxSpeedLittleStepper;
 const int maxAccelerationBigStepper = maxSpeedLittleStepper;
+const int maxSpeedDrainStepper = maxSpeedLittleStepper;
 
 // Define debounce interval for button
 const int debounceInterval = 50; // Debounce interval for button
 const int timeoutMillis = 20000; // Timeout duration in milliseconds
-const int bigTankDrainDuration = 4000; // Duration to drain the big tank
+const int tankDrainDuration = 4000; // Duration to drain the big tank
 int state = 1; // Current state of the system
 bool isTimeout = false; // Flag indicating if timeout has occurred
 bool mediumTankFull = false; // Flag indicating if medium tank is full
@@ -62,6 +64,8 @@ void setupAllSteppers()
     littleStepper.setAcceleration(maxAccelerationLittleStepper);
     bigStepper.setMaxSpeed(maxSpeedBigStepper);
     bigStepper.setAcceleration(maxAccelerationBigStepper);
+    drainStepper.setMaxSpeed(maxSpeedBigStepper);
+    drainStepper.setSpeed(maxSpeedBigStepper);
 }
 
 void setup()
@@ -146,18 +150,11 @@ void calibrateSumpPump()
 
 void timeout()
 {
-    Serial << "Timeout, draining tank..." << endl;
+    Serial << "Timeout" << endl;
     // reset medium tank
-    stepperDispense(bigStepper, 53895, false, uLsPerRevBigStepper, maxSpeedBigStepper); ///////////////////////////
-    Serial << "Medium tank empty" << endl;
-    digitalWrite(bigPumpEnablePin, HIGH);
-    delay(bigTankDrainDuration);
-    digitalWrite(bigPumpEnablePin, LOW);
-    Serial << "big tank empty" << endl;
+    drainTanks();
     state = 0;
     isTimeout = true;
-    mediumTankFull = false;
-    bigTankFull = false;
 }
 
 void exhibitRoutine()
@@ -224,4 +221,16 @@ void calibratePump(AccelStepper stepper, bool forward)
     }
     digitalWrite(enablePin, HIGH); // turn them off to save power
     Serial << " done. note volume dispensed and divide by 10 to get uL per rev" << endl;
+}
+
+void drainTanks()
+{
+    Serial << "Draining tanks... " << endl;
+    drainStepper.runSpeed(); // Run the stepper motor at the specified speed
+    digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
+    delay(tankDrainDuration); // Wait for the specified duration
+    Serial << "Tanks drained" << endl;
+    state = 0;
+    mediumTankFull = false;
+    bigTankFull = false;
 }
