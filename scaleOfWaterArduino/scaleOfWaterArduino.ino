@@ -22,24 +22,24 @@ const int stepsPerRev = 1600;           // with 8x microstepping (200 steps per 
 const int uLsPerRevLittleStepper = 422; // 3.56mL per 10
 const int uLsPerRevBigStepper = 3190;   /////////////////////////////////////// 3,6mL per rev
 
-const int mLsPerSecondSumpPump = 420; 
+const int mLsPerSecondSumpPump = 420; //  How many mLs per second the sump pump dispenses
 
-// Define maximum speed and acceleration
+// Define maximum speed and acceleration for the stepper motors
 const int maxSpeedLittleStepper = 8 * 560000; // 350*1600 per datasheet;
 const int maxAccelerationLittleStepper = maxSpeedLittleStepper;
 const int maxSpeedBigStepper = maxSpeedLittleStepper;
 const int maxAccelerationBigStepper = maxSpeedLittleStepper;
 
 // Define debounce interval for button
-const int debounceInterval = 50;
-const int timeoutMillis = 20000;
-const int bigTankDrainDuration = 4000;
-int state = 1;
-bool isTimeout = false;
-bool mediumTankFull = false;
-bool bigTankFull = false;
+const int debounceInterval = 50; // Debounce interval for button
+const int timeoutMillis = 20000; // Timeout duration in milliseconds
+const int bigTankDrainDuration = 4000; // Duration to drain the big tank
+int state = 1; // Current state of the system
+bool isTimeout = false; // Flag indicating if timeout has occurred
+bool mediumTankFull = false; // Flag indicating if medium tank is full
+bool bigTankFull = false; // Flag indicating if big tank is full
 
-Bounce button = Bounce();
+Bounce button = Bounce(); 
 
 // Function to dispense X mL in the specified direction
 void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev, int speed)
@@ -150,10 +150,10 @@ void calibrateSumpPump()
 
 void timeout()
 {
-    Serial << "timeout, draining tank..." << endl;
+    Serial << "Timeout, draining tank..." << endl;
     // reset medium tank
     stepperDispense(bigStepper, 53895, false, uLsPerRevBigStepper, maxSpeedBigStepper); ///////////////////////////
-    Serial << "medium tank empty" << endl;
+    Serial << "Medium tank empty" << endl;
     digitalWrite(bigPumpEnablePin, HIGH);
     delay(bigTankDrainDuration);
     digitalWrite(bigPumpEnablePin, LOW);
@@ -212,7 +212,7 @@ void sumpPumpDispense(int mLs)
     digitalWrite(bigPumpEnablePin, HIGH);
     delay(mLs / mLsPerSecondSumpPump * 1000);
     digitalWrite(bigPumpEnablePin, LOW);
-    Serial << " done" << endl;
+    Serial << "Done Pumping Sump Pump" << endl;
     bigTankFull = true;
 }
 
