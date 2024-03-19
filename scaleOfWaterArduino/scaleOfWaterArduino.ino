@@ -2,7 +2,6 @@
 #include <Arduino.h> // Library for Arduino
 #include <AccelStepper.h> // Library for stepper motor
 #include <Bounce2.h>     // Library for debouncing button
-#include <EEPROM.h>     // Library for reading and writing to EEPROM
 #include <Streaming.h> // Library for printing in streaming method
 #ifdef PLATFORMIO
   #include <git_info.h>  // Library for printing git information
@@ -72,7 +71,6 @@ void setup()
     #ifdef PLATFORMIO
       gitPrint(); //prints git info to the serial monitor
     #endif
-    state = EEPROM.read(STATE_ADDRESS);
 
     // Set up the stepper motor
     Serial.begin(115200);
@@ -159,7 +157,6 @@ void timeout()
     digitalWrite(bigPumpEnablePin, LOW);
     Serial << "big tank empty" << endl;
     state = 0;
-    EEPROM.write(STATE_ADDRESS, state);
     isTimeout = true;
     mediumTankFull = false;
     bigTankFull = false;
@@ -202,7 +199,6 @@ void exhibitRoutine()
         }
 
         state = state + 1;
-        EEPROM.write(STATE_ADDRESS, state);
     }
 }
 
