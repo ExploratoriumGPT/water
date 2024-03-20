@@ -39,8 +39,6 @@ void setup()
 
 void loop()
 {
-	handDropStepper.run();
-	smallTankStepper.run();
 	buttonPoll();
 	dispense();
 	timeout();
@@ -122,7 +120,7 @@ void buttonPoll()
 		if ( buttons[i].fell() ) {
 			if (i == NUM_BUTTONS - 1) { // Make sure drain button pin is the last one in the array
 				// Toggle the drain
-				drainTank(BOTH_TANKS);
+				drainTank(BOTH_TANKS); // BLOCKING, which is acceptable because we should block while draining
         Serial << "Drain button pressed" << endl;
 			} else {
 				// Toggle the LED
@@ -136,7 +134,6 @@ void buttonPoll()
 			}
 		}
 	}
-
 }
 
 // Function to dispense X mL in the specified direction
@@ -207,6 +204,11 @@ void drainTank(int tanksToDrain)
 {
   Serial << "Draining tank (3 is both) " << tanksToDrain << endl;
 	drainStepper.enableOutputs(); // Enable the stepper motor outputs for the drain stepper
+
+	for (int i = 0; i < NUM_BUTTON_LIGHTS; i++) {
+		digitalWrite(BUTTON_LIGHT_PINS[i], LOW); // Turn off the lights for each button to indicate that the tank is being drained
+	}
+
   switch (tanksToDrain)
   {
     case LARGE_TANK:

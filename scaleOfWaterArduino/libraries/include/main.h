@@ -16,7 +16,7 @@ void stepperDispense(AccelStepper stepper, long steps, bool dir, float uLsPerRev
 void timeout();
 void dispense();
 void sumpPumpDispense(int mLs);
-void drainTank();
+void drainTank(int tank);
 void overflowCheck(int tank); // Currently redundant with ISR, but may be useful in the future if we want a full check
 void resolveOverflow(int tank);
 void bigTankOverflowISR();
