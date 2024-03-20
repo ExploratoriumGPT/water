@@ -33,8 +33,8 @@ void setup()
 	#endif
 
   drainTank(BOTH_TANKS); // Drain both tanks
-	buttonSetup(); // Set up the buttons and button lights
-	setupAllSteppers(); // Set up the stepper motors
+	setupButtons(); // Set up the buttons and button lights
+	setupSteppers(); // Set up the stepper motors
 }
 
 void loop()
@@ -46,7 +46,7 @@ void loop()
 	timeout();
 }
 
-void buttonSetup()
+void setupButtons()
 {
 	// Setup button pins
 	for (int i = 0; i < NUM_BUTTONS; i++) {
@@ -63,7 +63,7 @@ void buttonSetup()
 }
 
 // Function to set up all stepper motors for AccelStepper library
-void setupAllSteppers()
+void setupSteppers()
 {
 	handDropStepper.setEnablePin(enPinHandDropStepper); // Set enable pin for little stepper motor
 	handDropStepper.setMaxSpeed(maxSpeedHandDropStepper); // Set maximum speed for little stepper motor
@@ -168,7 +168,6 @@ void timeout()
 void dispense()
 {
 		Serial << "Button press, current state: " << state << endl;
-
     switch (state)
     {
     case HAND_DROP_STATE:
@@ -186,10 +185,13 @@ void dispense()
       Serial << "Big tank drop state" << endl;
       sumpPumpDispense(bigTankVolume);
       break;
+		case RESET_STATE:
+			break;
     default:
       Serial << "Invalid state" << endl;
       break;
 	}
+	state = RESET_STATE;
 }
 
 void sumpPumpDispense(int mLs)
@@ -237,7 +239,7 @@ void drainTank(int tanksToDrain)
 	drainStepper.disableOutputs(); // Disable the stepper motor outputs for the drain stepper
 	state = RESET_STATE;
 }
-
+/*
 void overflowCheck(int tank) { // Currently redundant with ISR, but may be useful in the future if we want a full check
     bool overflowDetected = false;
 
@@ -261,7 +263,7 @@ void overflowCheck(int tank) { // Currently redundant with ISR, but may be usefu
       resolveOverflow(tank);
     }
 }
-
+*/
 void resolveOverflow(int tank) {
 	const int maxRetries = 5;
 	const unsigned long delayDuration = 10000; // 10 seconds for retry delay

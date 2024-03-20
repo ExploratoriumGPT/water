@@ -5,8 +5,8 @@
 
 // Main functions, in rough order of appearance
 // setup functions
-void buttonSetup();
-void setupAllSteppers();
+void setupButtons();
+void setupSteppers();
 // calibrate functions
 void calibrateSumpPump();
 void calibratePump(AccelStepper stepper, bool forward);
