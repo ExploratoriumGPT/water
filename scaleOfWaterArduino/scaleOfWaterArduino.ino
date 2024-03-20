@@ -8,17 +8,17 @@
 #endif
 // Local files
 #include "libraries/include/main.h" // Header file for scaleOfWaterArduino.ino
-#include "libraries/include/config.h" // Header file for pin definitions
+#include "libraries/include/config.h" // Header file for pin definitions and configuration items
 
 // Create instances of AccelStepper and Bounce objects
 AccelStepper littleStepper(AccelStepper::DRIVER, stepPinLittleStepper, dirPinLittleStepper);
 AccelStepper bigStepper(AccelStepper::DRIVER, stepPinBigStepper, dirPinBigStepper);
 AccelStepper drainStepper(AccelStepper::DRIVER, stepPinDrainStepper, dirPinDrainStepper);
-
-State state = RESET_STATE; // Initialize and set state
-DispenseType dispenseType; // Initialize the dispense type
-
 Bounce * buttons = new Bounce[NUM_BUTTONS]; // Create an array of button objects
+
+// Initialize enums
+State state = RESET_STATE; // Initialize enum and set state
+DispenseType dispenseType; // Initialize the dispense enum
 
 void setup()
 {
@@ -35,9 +35,6 @@ void setup()
   drainTank(BOTH_TANKS); // Drain both tanks
 	buttonSetup(); // Set up the buttons and button lights
 	setupAllSteppers(); // Set up the stepper motors
-
-	// Set up the button
-	pinMode(bigPumpEnablePin, OUTPUT);
 }
 
 void loop()
@@ -72,6 +69,52 @@ void buttonSetup()
 
 }
 
+void setupAllSteppers()
+{
+	pinMode(enablePin, OUTPUT);
+	littleStepper.setMaxSpeed(maxSpeedLittleStepper);
+	littleStepper.setAcceleration(maxAccelerationLittleStepper);
+	bigStepper.setMaxSpeed(maxSpeedBigStepper);
+	bigStepper.setAcceleration(maxAccelerationBigStepper);
+	drainStepper.setMaxSpeed(maxSpeedBigStepper);
+	drainStepper.setSpeed(maxSpeedBigStepper);
+}
+
+/* Commenting out for now to worry about calibration later
+void calibrateSumpPump()
+{
+	if (button.fell())
+	{
+		digitalWrite(bigPumpEnablePin, HIGH);
+		millisAtStartOfFill = millis();
+		Serial << "button down!" << endl;
+	}
+	else if (button.rose())
+	{
+		digitalWrite(bigPumpEnablePin, LOW);
+		millisAtEndOfFill = millis();
+		millisToFillTank = millisAtEndOfFill - millisAtStartOfFill;
+		Serial << "millisToFillTank: " << millisToFillTank << endl;
+	}
+} 
+
+void calibratePump(AccelStepper stepper, bool forward)
+{
+	int revs = 10;
+	int steps = revs * stepsPerRev;
+	Serial << "Calibrating pump... " << "spinning " << revs << " revs (" << steps << " steps) " 
+	<< (forward ? "forwards... " : "backwards... ") << endl;
+	digitalWrite(enablePin, LOW);
+	stepper.move(forward ? -steps : steps);
+	while (stepper.distanceToGo() != 0)
+	{
+		stepper.run();
+	}
+	digitalWrite(enablePin, HIGH); // turn them off to save power
+	Serial << " done. note volume dispensed and divide by 10 to get uL per rev" << endl;
+}
+*/
+
 void buttonPoll()
 {    
 	for (int i = 0; i < NUM_BUTTONS; i++)  {
@@ -88,6 +131,7 @@ void buttonPoll()
 				ledState = LOW; // toggle the LED state off
         if (i == state) {
           drainTank(i); // if the button is pressed again, drain the tank
+          ledState = HIGH; // toggle the LED state on
         }
 				state = static_cast<State>(i); // set the state to the button that was pressed
         lastButtonPressTime = millis(); // update the last button press time for timeout
@@ -114,47 +158,6 @@ void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev
 	Serial.println(" done");
 }
 
-void setupAllSteppers()
-{
-	pinMode(enablePin, OUTPUT);
-	littleStepper.setMaxSpeed(maxSpeedLittleStepper);
-	littleStepper.setAcceleration(maxAccelerationLittleStepper);
-	bigStepper.setMaxSpeed(maxSpeedBigStepper);
-	bigStepper.setAcceleration(maxAccelerationBigStepper);
-	drainStepper.setMaxSpeed(maxSpeedBigStepper);
-	drainStepper.setSpeed(maxSpeedBigStepper);
-}
-
-#ifdef PLATFORMIO //if using platformio, print git information
-void gitPrint() { //prints git information to the serial monitor using the Streaming library
-  Serial << F("Git Information:\n")
-  << F("Build Date/Time (local time): ") << BUILD_DATE << F("\n")
-  << F("Builder's Name:  ") << GIT_USER_NAME << F(" Email: ") << GIT_USER_EMAIL  << F("\n")
-  << F("Repository URL: ") << GIT_REPO_URL << F("\n")
-  << F("Branch: ") << GIT_BRANCH << F(" | Tag: ") << GIT_TAG  << F("\n\n")
-  << F("Commit Hash: ") << GIT_COMMIT_HASH << F("\n") 
-  << F("\n=================================") << endl;
-}
-#endif
-
-/* Commenting out for now to worry about calibration later
-void calibrateSumpPump()
-{
-	if (button.fell())
-	{
-		digitalWrite(bigPumpEnablePin, HIGH);
-		millisAtStartOfFill = millis();
-		Serial << "button down!" << endl;
-	}
-	else if (button.rose())
-	{
-		digitalWrite(bigPumpEnablePin, LOW);
-		millisAtEndOfFill = millis();
-		millisToFillTank = millisAtEndOfFill - millisAtStartOfFill;
-		Serial << "millisToFillTank: " << millisToFillTank << endl;
-	}
-} */
-
 void timeout()
 {
 	Serial << "Timeout" << endl;
@@ -172,12 +175,15 @@ void dispense()
     case HAND_DROP_STATE:
       Serial << "Hand drop state" << endl;
       stepperDispense(littleStepper, 100, true, uLsPerRevLittleStepper, maxSpeedLittleStepper);
+      digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn on the light for the hand drop button after dispensing
       break;
     case SMALL_DROP_STATE:
+      digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], LOW); // Turn off the light for the small tank button to show that its full
       Serial << "Small tank drop state" << endl;
       stepperDispense(bigStepper, 100, true, uLsPerRevBigStepper, maxSpeedBigStepper);
       break;
     case BIG_DROP_STATE:
+      digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], LOW); // Turn off the light for the large tank button to show that its full
       Serial << "Big tank drop state" << endl;
       sumpPumpDispense(100);
       break;
@@ -197,48 +203,47 @@ void sumpPumpDispense(int mLs)
 	bigTankFull = true;
 }
 
-void calibratePump(AccelStepper stepper, bool forward)
-{
-	int revs = 10;
-	int steps = revs * stepsPerRev;
-	Serial << "Calibrating pump... " << "spinning " << revs << " revs (" << steps << " steps) " 
-	<< (forward ? "forwards... " : "backwards... ") << endl;
-	digitalWrite(enablePin, LOW);
-	stepper.move(forward ? -steps : steps);
-	while (stepper.distanceToGo() != 0)
-	{
-		stepper.run();
-	}
-	digitalWrite(enablePin, HIGH); // turn them off to save power
-	Serial << " done. note volume dispensed and divide by 10 to get uL per rev" << endl;
-}
-
-
 void drainTank(int tanksToDrain)
 {
-Serial << "Draining tank (3 is both) " << tanksToDrain << endl;
-switch (tanksToDrain)
-{
-  case LARGE_TANK:
-    digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
-    delay(tankDrainDuration); // Wait for the specified duration
-    digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
-    break;
-  case SMALL_TANK:
-    drainStepper.runSpeed(); // Run the stepper motor at the specified speed
-    delay(tankDrainDuration); // Wait for the specified duration. Can change drain time to be smaller if necessary
-    smallTankFull = false;
-    break;
-  case BOTH_TANKS:
-    digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
-    drainStepper.runSpeed(); // Run the stepper motor at the specified speed
-    delay(tankDrainDuration); // Wait for the specified duration
-    // If small tank and large tank have separate drain times, use the drain time that is longer
-    digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
-    break;
-  default:
-    Serial << "Invalid tank to drain" << endl;
-    break;
-}
+  Serial << "Draining tank (3 is both) " << tanksToDrain << endl;
+  switch (tanksToDrain)
+  {
+    case LARGE_TANK:
+      digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
+      delay(tankDrainDuration); // Wait for the specified duration
+      digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
+      digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
+      break;
+    case SMALL_TANK:
+      drainStepper.runSpeed(); // Run the stepper motor at the specified speed
+      delay(tankDrainDuration); // Wait for the specified duration. Can change drain time to be smaller if necessary
+      smallTankFull = false;
+      digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], HIGH); // Turn on the light for the small tank button
+      break;
+    case BOTH_TANKS:
+      digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
+      drainStepper.runSpeed(); // Run the stepper motor at the specified speed
+      delay(tankDrainDuration); // Wait for the specified duration
+      // If small tank and large tank have separate drain times, use the drain time that is longer
+      digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
+      digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
+      digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], HIGH); // Turn on the light for the small tank button
+      break;
+    default:
+      Serial << "Invalid tank to drain" << endl;
+      break;
+  }
 	state = RESET_STATE;
 }
+
+#ifdef PLATFORMIO //if using platformio, print git information
+void gitPrint() { //prints git information to the serial monitor using the Streaming library
+  Serial << F("Git Information:\n")
+  << F("Build Date/Time (local time): ") << BUILD_DATE << F("\n")
+  << F("Builder's Name:  ") << GIT_USER_NAME << F(" Email: ") << GIT_USER_EMAIL  << F("\n")
+  << F("Repository URL: ") << GIT_REPO_URL << F("\n")
+  << F("Branch: ") << GIT_BRANCH << F(" | Tag: ") << GIT_TAG  << F("\n\n")
+  << F("Commit Hash: ") << GIT_COMMIT_HASH << F("\n") 
+  << F("\n=================================") << endl;
+}
+#endif

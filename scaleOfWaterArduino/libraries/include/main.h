@@ -3,17 +3,22 @@
 
 #include <AccelStepper.h> // Include the AccelStepper library. Necessary for declarations
 
+// Main functions, in rough order of appearance
+// setup functions
 void buttonSetup();
+void setupAllSteppers();
+// calibrate functions
+void calibrateSumpPump();
+void calibratePump(AccelStepper stepper, bool forward);
+// main loop functions
 void buttonPoll();
 void stepperDispense(AccelStepper stepper, long steps, bool dir, float uLsPerRev, float maxSpeed);
-void setupAllSteppers();
-void gitPrint();
-void calibrateSumpPump();
 void timeout();
 void dispense();
 void sumpPumpDispense(int mLs);
 void drainTank();
-void calibratePump(AccelStepper stepper, bool forward);
+// helper functions
+void gitPrint();
 
 long millisToFillTank;
 long millisAtStartOfFill;
