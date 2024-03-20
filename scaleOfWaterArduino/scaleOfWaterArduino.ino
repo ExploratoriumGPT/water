@@ -15,111 +15,117 @@ AccelStepper littleStepper(AccelStepper::DRIVER, stepPinLittleStepper, dirPinLit
 AccelStepper bigStepper(AccelStepper::DRIVER, stepPinBigStepper, dirPinBigStepper);
 AccelStepper drainStepper(AccelStepper::DRIVER, stepPinDrainStepper, dirPinDrainStepper);
 
-// Define steps per revolution and mLs per revolution
-const int stepsPerRev = 1600;           // with 8x microstepping (200 steps per rev)
-const int uLsPerRevLittleStepper = 422; // 3.56mL per 10
-const int uLsPerRevBigStepper = 3190;   /////////////////////////////////////// 3,6mL per rev
+State state = RESET_STATE; // Initialize and set state
+DispenseType dispenseType; // Initialize the dispense type
 
-const int mLsPerSecondSumpPump = 420; //  How many mLs per second the sump pump dispenses
+Bounce * buttons = new Bounce[NUM_BUTTONS]; // Create an array of button objects
 
-// Define maximum speed and acceleration for the stepper motors
-const int maxSpeedLittleStepper = 8 * 560000; // 350*1600 per datasheet;
-const int maxAccelerationLittleStepper = maxSpeedLittleStepper;
-const int maxSpeedBigStepper = maxSpeedLittleStepper;
-const int maxAccelerationBigStepper = maxSpeedLittleStepper;
-const int maxSpeedDrainStepper = maxSpeedLittleStepper;
+void setup()
+{
+	Serial.begin(9600);
+	Serial << F("All further serial debug will be at 115,200 baud") << endl;
+	delay(1000);
+	Serial.begin(115200);
+	Serial << F("\nStarting setup") << endl;
 
-// Define debounce interval for button
-const int debounceInterval = 50; // Debounce interval for button
-const int timeoutMillis = 20000; // Timeout duration in milliseconds
-const int tankDrainDuration = 4000; // Duration to drain the big tank
-int state = 1; // Current state of the system
-bool isTimeout = false; // Flag indicating if timeout has occurred
-bool mediumTankFull = false; // Flag indicating if medium tank is full
-bool bigTankFull = false; // Flag indicating if big tank is full
+	#ifdef PLATFORMIO
+		gitPrint(); //prints git info to the serial monitor
+	#endif
 
-Bounce button = Bounce(); 
+  drainTank(BOTH_TANKS); // Drain both tanks
+	buttonSetup(); // Set up the buttons and button lights
+	setupAllSteppers(); // Set up the stepper motors
+
+	// Set up the button
+	pinMode(bigPumpEnablePin, OUTPUT);
+}
+
+void loop()
+{
+	littleStepper.run();
+	bigStepper.run();
+	buttonPoll();
+	dispense();
+
+	if (!isTimeout && lastButtonPressTime > timeoutMillis)
+	{
+		Serial.println("TIME BASED timeout, draining tanks...");
+		timeout();
+	}
+
+	// calibrateSumpPump();
+}
+
+void buttonSetup()
+{
+	// Setup button pins
+	for (int i = 0; i < NUM_BUTTONS; i++) {
+		buttons[i].attach( BUTTON_PINS[i] , INPUT_PULLUP  );       //setup the bounce instance for the current button
+		buttons[i].interval(debounceInterval);              // interval in ms
+	}
+
+	//Setup LED pins
+	for (int i = 0; i < NUM_BUTTON_LIGHTS; i++) {
+		pinMode(BUTTON_LIGHT_PINS[i], OUTPUT); // set the LED pin to output
+		digitalWrite(BUTTON_LIGHT_PINS[i], ledState); // initialize the LED in high state
+	}
+
+}
+
+void buttonPoll()
+{    
+	for (int i = 0; i < NUM_BUTTONS; i++)  {
+		// Update the Bounce instance :
+		buttons[i].update();
+		// If it fell, flag the need to toggle the LED
+		if ( buttons[i].fell() ) {
+			if (i == NUM_BUTTONS - 1) {
+				// Toggle the drain
+				drainTank(BOTH_TANKS);
+        Serial << "Drain button pressed" << endl;
+			} else {
+				// Toggle the LED
+				ledState = LOW; // toggle the LED state off
+        if (i == state) {
+          drainTank(i); // if the button is pressed again, drain the tank
+        }
+				state = static_cast<State>(i); // set the state to the button that was pressed
+        lastButtonPressTime = millis(); // update the last button press time for timeout
+			}
+		}
+	}
+
+}
 
 // Function to dispense X mL in the specified direction
 void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev, int speed)
 {
-    digitalWrite(enablePin, LOW);
-    // Calculate the number of steps required to dispense the specified uL
-    int steps = round((float)uL / uLsPerRev * stepsPerRev);
-    Serial << "Dispensing " << uL << " uL (" << steps << " steps) " << (forward ? "forwards... " : "backwards... ") << endl;
-    stepper.move(forward ? -steps : steps); // Move the stepper motor forward or backward by the specified number of steps
-    // Run the stepper motor until it reaches the target position ////blocking code
-    while (stepper.distanceToGo() != 0)
-    {
-        stepper.run();
-    }
-    digitalWrite(enablePin, HIGH); // turn them off to save power
-    Serial.println(" done");
+	digitalWrite(enablePin, LOW);
+	// Calculate the number of steps required to dispense the specified uL
+	int steps = round((float)uL / uLsPerRev * stepsPerRev);
+	Serial << "Dispensing " << uL << " uL (" << steps << " steps) " << (forward ? "forwards... " : "backwards... ") << endl;
+	stepper.move(forward ? -steps : steps); // Move the stepper motor forward or backward by the specified number of steps
+	// Run the stepper motor until it reaches the target position ////blocking code
+	while (stepper.distanceToGo() != 0)
+	{
+		stepper.run();
+	}
+	digitalWrite(enablePin, HIGH); // turn them off to save power
+	Serial.println(" done");
 }
 
 void setupAllSteppers()
 {
-    pinMode(enablePin, OUTPUT);
-    littleStepper.setMaxSpeed(maxSpeedLittleStepper);
-    littleStepper.setAcceleration(maxAccelerationLittleStepper);
-    bigStepper.setMaxSpeed(maxSpeedBigStepper);
-    bigStepper.setAcceleration(maxAccelerationBigStepper);
-    drainStepper.setMaxSpeed(maxSpeedBigStepper);
-    drainStepper.setSpeed(maxSpeedBigStepper);
+	pinMode(enablePin, OUTPUT);
+	littleStepper.setMaxSpeed(maxSpeedLittleStepper);
+	littleStepper.setAcceleration(maxAccelerationLittleStepper);
+	bigStepper.setMaxSpeed(maxSpeedBigStepper);
+	bigStepper.setAcceleration(maxAccelerationBigStepper);
+	drainStepper.setMaxSpeed(maxSpeedBigStepper);
+	drainStepper.setSpeed(maxSpeedBigStepper);
 }
 
-void setup()
-{
-    #ifdef PLATFORMIO
-      gitPrint(); //prints git info to the serial monitor
-    #endif
-
-    // Set up the stepper motor
-    Serial.begin(115200);
-    Serial.println("Starting Stepper Demo...");
-    setupAllSteppers();
-    // Set up the button
-    pinMode(buttonPin, INPUT_PULLUP);
-    button.attach(buttonPin);
-    button.interval(debounceInterval);
-    pinMode(bigPumpEnablePin, OUTPUT);
-}
-
-// #DEFINE TINY_DROP_STATE 1
-// #DEFINE BIG_DROP_STATE 2
-// #DEFINE RESET_STATE 3
-long millisToFillTank;
-long millisAtStartOfFill;
-long millisAtEndOfFill;
-long lastButtonPressTime;
-
-
-void loop()
-{
-    littleStepper.run();
-    bigStepper.run();
-    button.update();
-
-    if (!isTimeout && lastButtonPressTime > timeoutMillis)
-    {
-        Serial.println("TIME BASED timeout, draining tank...");
-        timeout();
-    }
-    // Check if the button is pressed and debounced
-    if (button.fell())
-    {
-        lastButtonPressTime = millis();
-        // calibratePump(bigStepper, false);
-        // calibratePump(littleStepper, true);
-        // calibratePump(littleStepper, true);
-        // calibratePump(littleStepper, true);
-        //
-        exhibitRoutine();
-    }
-    // calibrateSumpPump();
-}
-
-#ifdef PLATFORMIO
+#ifdef PLATFORMIO //if using platformio, print git information
 void gitPrint() { //prints git information to the serial monitor using the Streaming library
   Serial << F("Git Information:\n")
   << F("Build Date/Time (local time): ") << BUILD_DATE << F("\n")
@@ -131,106 +137,108 @@ void gitPrint() { //prints git information to the serial monitor using the Strea
 }
 #endif
 
+/* Commenting out for now to worry about calibration later
 void calibrateSumpPump()
 {
-    if (button.fell())
-    {
-        digitalWrite(bigPumpEnablePin, HIGH);
-        millisAtStartOfFill = millis();
-        Serial << "button down!" << endl;
-    }
-    else if (button.rose())
-    {
-        digitalWrite(bigPumpEnablePin, LOW);
-        millisAtEndOfFill = millis();
-        millisToFillTank = millisAtEndOfFill - millisAtStartOfFill;
-        Serial << "millisToFillTank: " << millisToFillTank << endl;
-    }
-}
+	if (button.fell())
+	{
+		digitalWrite(bigPumpEnablePin, HIGH);
+		millisAtStartOfFill = millis();
+		Serial << "button down!" << endl;
+	}
+	else if (button.rose())
+	{
+		digitalWrite(bigPumpEnablePin, LOW);
+		millisAtEndOfFill = millis();
+		millisToFillTank = millisAtEndOfFill - millisAtStartOfFill;
+		Serial << "millisToFillTank: " << millisToFillTank << endl;
+	}
+} */
 
 void timeout()
 {
-    Serial << "Timeout" << endl;
-    // reset medium tank
-    drainTanks();
-    state = 0;
-    isTimeout = true;
+	Serial << "Timeout" << endl;
+	// reset medium tank
+	drainTank(BOTH_TANKS);
+	isTimeout = true;
 }
 
-void exhibitRoutine()
+void dispense()
 {
+		Serial << "Button press, current state: " << state << endl;
+
+    switch (state)
     {
-        Serial << "Button pressed!";
-        Serial << "Current state: " << state << endl;
-
-        if (state == 1)
-        {
-            if (mediumTankFull) // if there is still water in the medium tank then timeout to drain
-            {
-                Serial << " BUTTON BASED RESET, DRAINING TANK";
-                timeout();
-                state = 0;
-            }
-            else
-            {
-
-                // isTimeout = false;
-                // sumpPumpDispense(2155);
-            }
-        }
-        else if (state == 2)
-        {
-            // spurt 53mL into the little tank
-            stepperDispense(bigStepper, 53895, true, uLsPerRevBigStepper, maxSpeedBigStepper);
-            mediumTankFull = true;
-                Serial << "bigStepper drip dropped" << endl;
-            }
-            else if (state == 3)
-            {
-                // spurt 0.65mL into user's hands
-                stepperDispense(littleStepper, 647, true, uLsPerRevLittleStepper, maxSpeedLittleStepper);
-                Serial << "littleStepper drip dropped" << endl;
-                state = 0;
-        }
-
-        state = state + 1;
-    }
+    case HAND_DROP_STATE:
+      Serial << "Hand drop state" << endl;
+      stepperDispense(littleStepper, 100, true, uLsPerRevLittleStepper, maxSpeedLittleStepper);
+      break;
+    case SMALL_DROP_STATE:
+      Serial << "Small tank drop state" << endl;
+      stepperDispense(bigStepper, 100, true, uLsPerRevBigStepper, maxSpeedBigStepper);
+      break;
+    case BIG_DROP_STATE:
+      Serial << "Big tank drop state" << endl;
+      sumpPumpDispense(100);
+      break;
+    default:
+      Serial << "Invalid state" << endl;
+      break;
+	}
 }
 
 void sumpPumpDispense(int mLs)
 {
-    Serial << "Dispensing " << mLs << " mLs sump pump... " << endl;
-    digitalWrite(bigPumpEnablePin, HIGH);
-    delay(mLs / mLsPerSecondSumpPump * 1000);
-    digitalWrite(bigPumpEnablePin, LOW);
-    Serial << "Done Pumping Sump Pump" << endl;
-    bigTankFull = true;
+	Serial << "Dispensing " << mLs << " mLs sump pump... " << endl;
+	digitalWrite(bigPumpEnablePin, HIGH);
+	delay(mLs / mLsPerSecondSumpPump * 1000);
+	digitalWrite(bigPumpEnablePin, LOW);
+	Serial << "Done Pumping Sump Pump" << endl;
+	bigTankFull = true;
 }
 
 void calibratePump(AccelStepper stepper, bool forward)
 {
-    int revs = 10;
-    int steps = revs * stepsPerRev;
-    Serial << "Calibrating pump... " << "spinning " << revs << " revs (" << steps << " steps) " 
-    << (forward ? "forwards... " : "backwards... ") << endl;
-    digitalWrite(enablePin, LOW);
-    stepper.move(forward ? -steps : steps);
-    while (stepper.distanceToGo() != 0)
-    {
-        stepper.run();
-    }
-    digitalWrite(enablePin, HIGH); // turn them off to save power
-    Serial << " done. note volume dispensed and divide by 10 to get uL per rev" << endl;
+	int revs = 10;
+	int steps = revs * stepsPerRev;
+	Serial << "Calibrating pump... " << "spinning " << revs << " revs (" << steps << " steps) " 
+	<< (forward ? "forwards... " : "backwards... ") << endl;
+	digitalWrite(enablePin, LOW);
+	stepper.move(forward ? -steps : steps);
+	while (stepper.distanceToGo() != 0)
+	{
+		stepper.run();
+	}
+	digitalWrite(enablePin, HIGH); // turn them off to save power
+	Serial << " done. note volume dispensed and divide by 10 to get uL per rev" << endl;
 }
 
-void drainTanks()
+
+void drainTank(int tanksToDrain)
 {
-    Serial << "Draining tanks... " << endl;
-    drainStepper.runSpeed(); // Run the stepper motor at the specified speed
+Serial << "Draining tank (3 is both) " << tanksToDrain << endl;
+switch (tanksToDrain)
+{
+  case LARGE_TANK:
     digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
     delay(tankDrainDuration); // Wait for the specified duration
-    Serial << "Tanks drained" << endl;
-    state = 0;
-    mediumTankFull = false;
-    bigTankFull = false;
+    digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
+    break;
+  case SMALL_TANK:
+    drainStepper.runSpeed(); // Run the stepper motor at the specified speed
+    delay(tankDrainDuration); // Wait for the specified duration. Can change drain time to be smaller if necessary
+    smallTankFull = false;
+    break;
+  case BOTH_TANKS:
+    digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
+    drainStepper.runSpeed(); // Run the stepper motor at the specified speed
+    delay(tankDrainDuration); // Wait for the specified duration
+    // If small tank and large tank have separate drain times, use the drain time that is longer
+    digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
+    break;
+  default:
+    Serial << "Invalid tank to drain" << endl;
+    break;
+}
+	state = RESET_STATE;
 }
