@@ -26,7 +26,7 @@ void setup()
 	Serial << F("All further serial debug will be at 115,200 baud") << endl;
 	delay(1000);
 	Serial.begin(115200);
-	Serial << F("\nStarting setup") << endl;
+	Serial << F("Starting setup") << endl;
 
 	#ifdef PLATFORMIO
 		gitPrint(); //prints git info to the serial monitor
@@ -43,14 +43,7 @@ void loop()
 	bigStepper.run();
 	buttonPoll();
 	dispense();
-
-	if (!isTimeout && lastButtonPressTime > timeoutMillis)
-	{
-		Serial.println("TIME BASED timeout, draining tanks...");
-		timeout();
-	}
-
-	// calibrateSumpPump();
+	timeout();
 }
 
 void buttonSetup()
@@ -72,11 +65,15 @@ void buttonSetup()
 // Function to set up all stepper motors for AccelStepper library
 void setupAllSteppers()
 {
-	pinMode(enablePin, OUTPUT); // Set enable pin as output
+	littleStepper.setEnablePin(enPinLittleStepper); // Set enable pin for little stepper motor
 	littleStepper.setMaxSpeed(maxSpeedLittleStepper); // Set maximum speed for little stepper motor
 	littleStepper.setAcceleration(maxAccelerationLittleStepper); // Set acceleration for little stepper motor
+
+	bigStepper.setEnablePin(enPinBigStepper); // Set enable pin for big stepper motor
 	bigStepper.setMaxSpeed(maxSpeedBigStepper); // Set maximum speed for big stepper motor
 	bigStepper.setAcceleration(maxAccelerationBigStepper); // Set acceleration for big stepper motor
+
+	drainStepper.setEnablePin(enPinDrainStepper); // Set enable pin for drain stepper motor
 	drainStepper.setMaxSpeed(maxSpeedBigStepper); // Set maximum speed for drain stepper motor
 	drainStepper.setSpeed(maxSpeedBigStepper); // Set speed for drain stepper motor
 }
@@ -145,7 +142,7 @@ void buttonPoll()
 // Function to dispense X mL in the specified direction
 void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev, int speed)
 {
-	digitalWrite(enablePin, LOW);
+	stepper.enableOutputs(); // Enable the stepper motor outputs
 	// Calculate the number of steps required to dispense the specified uL
 	int steps = round((float)uL / uLsPerRev * stepsPerRev);
 	Serial << "Dispensing " << uL << " uL (" << steps << " steps) " << (forward ? "forwards... " : "backwards... ") << endl;
@@ -155,16 +152,17 @@ void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev
 	{
 		stepper.run();
 	}
-	digitalWrite(enablePin, HIGH); // turn them off to save power
+	stepper.disableOutputs(); // Disable the stepper motor outputs
 	Serial.println(" done");
 }
 
 void timeout()
 {
-	Serial << "Timeout" << endl;
-	// reset medium tank
-	drainTank(BOTH_TANKS);
-	isTimeout = true;
+	if (lastButtonPressTime > timeoutMillis)
+	{
+		Serial << "Timeout" << endl;
+		drainTank(BOTH_TANKS);
+	}
 }
 
 void dispense()
@@ -206,6 +204,7 @@ void sumpPumpDispense(int mLs)
 void drainTank(int tanksToDrain)
 {
   Serial << "Draining tank (3 is both) " << tanksToDrain << endl;
+	drainStepper.enableOutputs(); // Enable the stepper motor outputs for the drain stepper
   switch (tanksToDrain)
   {
     case LARGE_TANK:
@@ -235,8 +234,10 @@ void drainTank(int tanksToDrain)
       Serial << "Invalid tank to drain" << endl;
       break;
   }
+	drainStepper.disableOutputs(); // Disable the stepper motor outputs for the drain stepper
 	state = RESET_STATE;
 }
+
 void overflowCheck(int tank) {
     bool overflowDetected = false;
 
@@ -278,10 +279,11 @@ void resolveOverflow(int tank) {
 			}
 	}
 	Serial << "Overflow could not be resolved after " << maxRetries << " attempts. Stopping program." << endl;
-	while(1);
+	while(1) {
+		Serial << "Program Stop due to overflow" << endl;
+		delay(5000);
+	}
 }
-
-
 
 #ifdef PLATFORMIO //if using platformio, print git information
 void gitPrint() { //prints git information to the serial monitor using the Streaming library
