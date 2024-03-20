@@ -27,7 +27,6 @@ const int bigDropButtonLightPin = A0; // CHANGE PIN
 const int smallDropButtonLightPin = A1; // CHANGE PIN
 const int handDropButtonLightPin = A2; // CHANGE PIN
 const uint8_t BUTTON_LIGHT_PINS[NUM_BUTTON_LIGHTS] = {bigDropButtonLightPin, smallDropButtonLightPin, handDropButtonLightPin};
-int ledState = HIGH; // initialize the LED in high state
 
 // CONFIG ITEMS, NOT PINS
 // Define steps per revolution and mLs per revolution
@@ -38,7 +37,7 @@ const int uLsPerRevBigStepper = 3190;   /////////////////////////////////////// 
 const int mLsPerSecondSumpPump = 420; //  How many mLs per second the sump pump dispenses
 
 // Define maximum speed and acceleration for the stepper motors
-const int maxSpeedLittleStepper = 8 * 560000; // 350*1600 per datasheet;
+const int maxSpeedLittleStepper = 8 * 560000; // 350*1600 per datasheet; NOTE: THIS IS OVER THE MAXIMUM VALUE FOR AN INT
 const int maxAccelerationLittleStepper = maxSpeedLittleStepper;
 const int maxSpeedBigStepper = maxSpeedLittleStepper;
 const int maxAccelerationBigStepper = maxSpeedLittleStepper;

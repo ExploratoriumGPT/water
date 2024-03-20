@@ -64,20 +64,21 @@ void buttonSetup()
 	//Setup LED pins
 	for (int i = 0; i < NUM_BUTTON_LIGHTS; i++) {
 		pinMode(BUTTON_LIGHT_PINS[i], OUTPUT); // set the LED pin to output
-		digitalWrite(BUTTON_LIGHT_PINS[i], ledState); // initialize the LED in high state
+		digitalWrite(BUTTON_LIGHT_PINS[i], HIGH); // initialize the LED in high state
 	}
 
 }
 
+// Function to set up all stepper motors for AccelStepper library
 void setupAllSteppers()
 {
-	pinMode(enablePin, OUTPUT);
-	littleStepper.setMaxSpeed(maxSpeedLittleStepper);
-	littleStepper.setAcceleration(maxAccelerationLittleStepper);
-	bigStepper.setMaxSpeed(maxSpeedBigStepper);
-	bigStepper.setAcceleration(maxAccelerationBigStepper);
-	drainStepper.setMaxSpeed(maxSpeedBigStepper);
-	drainStepper.setSpeed(maxSpeedBigStepper);
+	pinMode(enablePin, OUTPUT); // Set enable pin as output
+	littleStepper.setMaxSpeed(maxSpeedLittleStepper); // Set maximum speed for little stepper motor
+	littleStepper.setAcceleration(maxAccelerationLittleStepper); // Set acceleration for little stepper motor
+	bigStepper.setMaxSpeed(maxSpeedBigStepper); // Set maximum speed for big stepper motor
+	bigStepper.setAcceleration(maxAccelerationBigStepper); // Set acceleration for big stepper motor
+	drainStepper.setMaxSpeed(maxSpeedBigStepper); // Set maximum speed for drain stepper motor
+	drainStepper.setSpeed(maxSpeedBigStepper); // Set speed for drain stepper motor
 }
 
 /* Commenting out for now to worry about calibration later
@@ -122,16 +123,16 @@ void buttonPoll()
 		buttons[i].update();
 		// If it fell, flag the need to toggle the LED
 		if ( buttons[i].fell() ) {
-			if (i == NUM_BUTTONS - 1) {
+			if (i == NUM_BUTTONS - 1) { // Make sure drain button pin is the last one in the array
 				// Toggle the drain
 				drainTank(BOTH_TANKS);
         Serial << "Drain button pressed" << endl;
 			} else {
 				// Toggle the LED
-				ledState = LOW; // toggle the LED state off
+				digitalWrite(BUTTON_LIGHT_PINS[i], LOW);
         if (i == state) {
           drainTank(i); // if the button is pressed again, drain the tank
-          ledState = HIGH; // toggle the LED state on
+          digitalWrite(BUTTON_LIGHT_PINS[i], HIGH); // Turn on the light for the button
         }
 				state = static_cast<State>(i); // set the state to the button that was pressed
         lastButtonPressTime = millis(); // update the last button press time for timeout
