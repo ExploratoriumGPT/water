@@ -8,7 +8,7 @@
 #endif
 // Local files
 #include "libraries/include/main.h" // Header file for scaleOfWaterArduino.ino
-#include "libraries/include/pins.h" // Header file for pin definitions
+#include "libraries/include/config.h" // Header file for pin definitions
 
 // Create instances of AccelStepper and Bounce objects
 AccelStepper littleStepper(AccelStepper::DRIVER, stepPinLittleStepper, dirPinLittleStepper);
