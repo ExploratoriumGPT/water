@@ -125,9 +125,9 @@ void buttonPoll()
 			} else {
 				// Toggle the LED
 				digitalWrite(BUTTON_LIGHT_PINS[i], LOW);
-        if (i == state) {
+        if (i == state && i != RESET_STATE) {
           drainTank(i); // if the button is pressed again, drain the tank
-          digitalWrite(BUTTON_LIGHT_PINS[i], HIGH); // Turn on the light for the button
+					return;
         }
 				state = static_cast<State>(i); // set the state to the button that was pressed
         lastButtonPressTime = millis(); // update the last button press time for timeout
@@ -145,11 +145,12 @@ void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev
 	Serial << "Dispensing " << uL << " uL (" << steps << " steps) " << (forward ? "forwards... " : "backwards... ") << endl;
 	stepper.move(forward ? -steps : steps); // Move the stepper motor forward or backward by the specified number of steps
 	// Run the stepper motor until it reaches the target position ////blocking code
-	while (stepper.distanceToGo() != 0)
-	{
-		stepper.run();
-	}
-	stepper.disableOutputs(); // Disable the stepper motor outputs
+  if (stepper.distanceToGo() != 0) {
+    stepper.run();
+  } else {
+    stepper.disableOutputs(); // Call this once the movement is complete
+  }
+
 	Serial.println(" done");
 }
 
@@ -193,11 +194,15 @@ void dispense()
 
 void sumpPumpDispense(int mLs)
 {
+	const unsigned long sumpDelay = (mLs / mLsPerSecondSumpPump * 1000);
+	unsigned long currentMillis = millis();
 	Serial << "Dispensing " << mLs << " mLs sump pump... " << endl;
 	digitalWrite(sumpPumpRelayPin, HIGH);
-	delay(mLs / mLsPerSecondSumpPump * 1000);
-	digitalWrite(sumpPumpRelayPin, LOW);
-	Serial << "Done Pumping Sump Pump" << endl;
+	if (currentMillis - previousMillis >= sumpDelay) {
+		digitalWrite(sumpPumpRelayPin, LOW);
+		Serial << "Done Pumping Sump Pump" << endl;
+		previousMillis = currentMillis;
+	}
 }
 
 void drainTank(int tanksToDrain)
