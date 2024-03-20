@@ -17,16 +17,17 @@ void timeout();
 void dispense();
 void sumpPumpDispense(int mLs);
 void drainTank();
-void overflowCheck(int tank);
+void overflowCheck(int tank); // Currently redundant with ISR, but may be useful in the future if we want a full check
 void resolveOverflow(int tank);
-
+void bigTankOverflowISR();
+void smallTankOverflowISR();
 // helper functions
 void gitPrint();
 
-long millisToFillTank;
-long millisAtStartOfFill;
-long millisAtEndOfFill;
-long lastButtonPressTime;
+// long millisToFillTank;
+// long millisAtStartOfFill;
+// long millisAtEndOfFill;
+long lastButtonPressTime = 0;
 
 typedef enum // Code to be used in the main loop to determine the state of the system
 {
@@ -38,7 +39,7 @@ typedef enum // Code to be used in the main loop to determine the state of the s
 
 typedef enum 
 {
-  HAND_DROP, // Note: not used
+  HAND_DROP, // Note: not used but included for consistency with other enum
   SMALL_TANK,
   LARGE_TANK,
   BOTH_TANKS

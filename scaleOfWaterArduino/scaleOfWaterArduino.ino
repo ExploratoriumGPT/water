@@ -11,9 +11,9 @@
 #include "libraries/include/config.h" // Header file for pin definitions and configuration items
 
 // Create instances of AccelStepper and Bounce objects
-AccelStepper littleStepper(AccelStepper::DRIVER, stepPinLittleStepper, dirPinLittleStepper);
-AccelStepper bigStepper(AccelStepper::DRIVER, stepPinBigStepper, dirPinBigStepper);
-AccelStepper drainStepper(AccelStepper::DRIVER, stepPinDrainStepper, dirPinDrainStepper);
+AccelStepper handDropStepper(AccelStepper::DRIVER, stpPinHandDropStepper, dirPinHandDropStepper);
+AccelStepper smallTankStepper(AccelStepper::DRIVER, stpPinSmallTankStepper, dirPinSmallTankStepper);
+AccelStepper drainStepper(AccelStepper::DRIVER, stpPinDrainStepper, dirPinDrainStepper);
 Bounce * buttons = new Bounce[NUM_BUTTONS]; // Create an array of button objects
 
 // Initialize enums
@@ -39,8 +39,8 @@ void setup()
 
 void loop()
 {
-	littleStepper.run();
-	bigStepper.run();
+	handDropStepper.run();
+	smallTankStepper.run();
 	buttonPoll();
 	dispense();
 	timeout();
@@ -65,17 +65,17 @@ void buttonSetup()
 // Function to set up all stepper motors for AccelStepper library
 void setupAllSteppers()
 {
-	littleStepper.setEnablePin(enPinLittleStepper); // Set enable pin for little stepper motor
-	littleStepper.setMaxSpeed(maxSpeedLittleStepper); // Set maximum speed for little stepper motor
-	littleStepper.setAcceleration(maxAccelerationLittleStepper); // Set acceleration for little stepper motor
+	handDropStepper.setEnablePin(enPinHandDropStepper); // Set enable pin for little stepper motor
+	handDropStepper.setMaxSpeed(maxSpeedHandDropStepper); // Set maximum speed for little stepper motor
+	handDropStepper.setAcceleration(maxAccelHandDropStepper); // Set acceleration for little stepper motor
 
-	bigStepper.setEnablePin(enPinBigStepper); // Set enable pin for big stepper motor
-	bigStepper.setMaxSpeed(maxSpeedBigStepper); // Set maximum speed for big stepper motor
-	bigStepper.setAcceleration(maxAccelerationBigStepper); // Set acceleration for big stepper motor
+	smallTankStepper.setEnablePin(enPinSmallTankStepper); // Set enable pin for big stepper motor
+	smallTankStepper.setMaxSpeed(maxSpeedSmallTankStepper); // Set maximum speed for big stepper motor
+	smallTankStepper.setAcceleration(maxAccelSmallTankStepper); // Set acceleration for big stepper motor
 
 	drainStepper.setEnablePin(enPinDrainStepper); // Set enable pin for drain stepper motor
-	drainStepper.setMaxSpeed(maxSpeedBigStepper); // Set maximum speed for drain stepper motor
-	drainStepper.setSpeed(maxSpeedBigStepper); // Set speed for drain stepper motor
+	drainStepper.setMaxSpeed(maxSpeedDrainStepper); // Set maximum speed for drain stepper motor
+	drainStepper.setSpeed(maxSpeedDrainStepper); // Set speed for drain stepper motor
 }
 
 /* Commenting out for now to worry about calibration later
@@ -173,18 +173,18 @@ void dispense()
     {
     case HAND_DROP_STATE:
       Serial << "Hand drop state" << endl;
-      stepperDispense(littleStepper, 100, true, uLsPerRevLittleStepper, maxSpeedLittleStepper);
+      stepperDispense(handDropStepper, handDropVolume, true, uLsPerRevSmallStepper, maxSpeedHandDropStepper);
       digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn on the light for the hand drop button after dispensing
       break;
     case SMALL_DROP_STATE:
       digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], LOW); // Turn off the light for the small tank button to show that its full
       Serial << "Small tank drop state" << endl;
-      stepperDispense(bigStepper, 100, true, uLsPerRevBigStepper, maxSpeedBigStepper);
+      stepperDispense(smallTankStepper, smallTankVolume, true, uLsPerRevBigStepper, maxSpeedSmallTankStepper);
       break;
     case BIG_DROP_STATE:
       digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], LOW); // Turn off the light for the large tank button to show that its full
       Serial << "Big tank drop state" << endl;
-      sumpPumpDispense(100);
+      sumpPumpDispense(bigTankVolume);
       break;
     default:
       Serial << "Invalid state" << endl;
@@ -211,13 +211,13 @@ void drainTank(int tanksToDrain)
       digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
       delay(tankDrainDuration); // Wait for the specified duration
       digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
-			overflowCheck(LARGE_TANK); // Check for overflow after draining the tank
+			//overflowCheck(LARGE_TANK); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
 			digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
       break;
     case SMALL_TANK:
       drainStepper.runSpeed(); // Run the stepper motor at the specified speed
       delay(tankDrainDuration); // Wait for the specified duration. Can change drain time to be smaller if necessary
-			overflowCheck(SMALL_TANK); // Check for overflow after draining the tank
+			//overflowCheck(SMALL_TANK); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
       digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], HIGH); // Turn on the light for the small tank button
       break;
     case BOTH_TANKS:
@@ -226,7 +226,7 @@ void drainTank(int tanksToDrain)
       delay(tankDrainDuration); // Wait for the specified duration
       // If small tank and large tank have separate drain times, use the drain time that is longer
       digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
-			overflowCheck(BOTH_TANKS); // Check for overflow after draining the tank
+			//overflowCheck(BOTH_TANKS); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
       digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
       digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], HIGH); // Turn on the light for the small tank button
       break;
@@ -238,7 +238,7 @@ void drainTank(int tanksToDrain)
 	state = RESET_STATE;
 }
 
-void overflowCheck(int tank) {
+void overflowCheck(int tank) { // Currently redundant with ISR, but may be useful in the future if we want a full check
     bool overflowDetected = false;
 
     // Check for overflow based on the tank type
@@ -283,6 +283,16 @@ void resolveOverflow(int tank) {
 		Serial << "Program Stop due to overflow" << endl;
 		delay(5000);
 	}
+}
+
+void overflowBigTankISR() {
+	Serial << "Big tank overflow detected." << endl;
+	resolveOverflow(LARGE_TANK);
+}
+
+void overflowSmallTankISR() {
+	Serial << "Small tank overflow detected." << endl;
+	resolveOverflow(SMALL_TANK);
 }
 
 #ifdef PLATFORMIO //if using platformio, print git information
