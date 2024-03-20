@@ -17,6 +17,9 @@ void timeout();
 void dispense();
 void sumpPumpDispense(int mLs);
 void drainTank();
+void overflowCheck(int tank);
+void resolveOverflow(int tank);
+
 // helper functions
 void gitPrint();
 

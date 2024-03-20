@@ -13,6 +13,9 @@ const int dirPinDrainStepper = 6; // CHANGE PIN
 const int enablePin = 8;
 const int bigPumpEnablePin = 12;
 const int drainBigTankRelayPin = A3; // this is a define because Arduino.h isn't included in this file, but its same as other pin definitions
+const int sumpPumpRelayPin = A5; // CHANGE PIN
+const int bigTankOverflowPin = A6; // CHANGE PIN
+const int smallTankOverflowPin = A7; // CHANGE PIN
 
 // Define pin number for button
 #define NUM_BUTTONS 4
@@ -48,7 +51,5 @@ const int debounceInterval = 50; // Debounce interval for button
 const int timeoutMillis = 20000; // Timeout duration in milliseconds
 const int tankDrainDuration = 4000; // Duration to drain the big tank
 bool isTimeout = false; // Flag indicating if timeout has occurred
-bool smallTankFull = false; // Flag indicating if medium tank is full
-bool bigTankFull = false; // Flag indicating if big tank is full
 
 #endif // PINS_H

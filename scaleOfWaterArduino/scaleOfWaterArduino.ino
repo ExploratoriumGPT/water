@@ -197,11 +197,10 @@ void dispense()
 void sumpPumpDispense(int mLs)
 {
 	Serial << "Dispensing " << mLs << " mLs sump pump... " << endl;
-	digitalWrite(bigPumpEnablePin, HIGH);
+	digitalWrite(sumpPumpRelayPin, HIGH);
 	delay(mLs / mLsPerSecondSumpPump * 1000);
-	digitalWrite(bigPumpEnablePin, LOW);
+	digitalWrite(sumpPumpRelayPin, LOW);
 	Serial << "Done Pumping Sump Pump" << endl;
-	bigTankFull = true;
 }
 
 void drainTank(int tanksToDrain)
@@ -213,12 +212,13 @@ void drainTank(int tanksToDrain)
       digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
       delay(tankDrainDuration); // Wait for the specified duration
       digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
-      digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
+			overflowCheck(LARGE_TANK); // Check for overflow after draining the tank
+			digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
       break;
     case SMALL_TANK:
       drainStepper.runSpeed(); // Run the stepper motor at the specified speed
       delay(tankDrainDuration); // Wait for the specified duration. Can change drain time to be smaller if necessary
-      smallTankFull = false;
+			overflowCheck(SMALL_TANK); // Check for overflow after draining the tank
       digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], HIGH); // Turn on the light for the small tank button
       break;
     case BOTH_TANKS:
@@ -227,6 +227,7 @@ void drainTank(int tanksToDrain)
       delay(tankDrainDuration); // Wait for the specified duration
       // If small tank and large tank have separate drain times, use the drain time that is longer
       digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
+			overflowCheck(BOTH_TANKS); // Check for overflow after draining the tank
       digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
       digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], HIGH); // Turn on the light for the small tank button
       break;
@@ -236,6 +237,51 @@ void drainTank(int tanksToDrain)
   }
 	state = RESET_STATE;
 }
+void overflowCheck(int tank) {
+    bool overflowDetected = false;
+
+    // Check for overflow based on the tank type
+    if (tank == LARGE_TANK || tank == BOTH_TANKS) {
+        if (digitalRead(bigTankOverflowPin)) {
+            Serial << "Big tank overflow detected." << endl;
+            overflowDetected = true;
+        }
+    }
+
+    if (tank == SMALL_TANK || tank == BOTH_TANKS) {
+        if (digitalRead(smallTankOverflowPin)) {
+            Serial << "Small tank overflow detected." << endl;
+            overflowDetected = true;
+        }
+    }
+
+    // If an overflow is detected, attempt to resolve it
+    if (overflowDetected) {
+      resolveOverflow(tank);
+    }
+}
+
+void resolveOverflow(int tank) {
+	const int maxRetries = 5;
+	const unsigned long delayDuration = 10000; // 10 seconds for retry delay
+
+	for (int retry = 0; retry < maxRetries; ++retry) {
+			drainTank(tank);  // Attempt to drain the tank(s)
+			delay(delayDuration);  // Wait before rechecking
+
+			// Recheck for overflow condition
+			if (!(tank == LARGE_TANK || tank == BOTH_TANKS) || !digitalRead(bigTankOverflowPin)) {
+					if (!(tank == SMALL_TANK || tank == BOTH_TANKS) || !digitalRead(smallTankOverflowPin)) {
+							Serial << "Overflow resolved after " << (retry + 1) << " attempts." << endl;
+							return; // Overflow successfully resolved
+					}
+			}
+	}
+	Serial << "Overflow could not be resolved after " << maxRetries << " attempts. Stopping program." << endl;
+	while(1);
+}
+
+
 
 #ifdef PLATFORMIO //if using platformio, print git information
 void gitPrint() { //prints git information to the serial monitor using the Streaming library
