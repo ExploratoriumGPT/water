@@ -63,10 +63,8 @@ const int maxSpeedDrainStepper = maxSpeedHandDropStepper; // no acceleration for
 const int debounceInterval = 50; // Debounce interval for button
 
 // Timeout
-const int timeoutMillis = 20000; // Timeout duration in milliseconds
-bool isTimeout = false; // Flag indicating if timeout has occurred
+const int timeoutMillis = 20000; // Timeout duration in milliseconds, 20 seconds
 // Other timing variables
-unsigned long previousMillis = 0; // Variable to store the last time the button was pressed
 const int tankDrainDuration = 4000; // Duration to drain the big tank
 
 #endif // PINS_H

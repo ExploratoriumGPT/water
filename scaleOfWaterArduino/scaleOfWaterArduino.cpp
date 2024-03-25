@@ -19,6 +19,8 @@ Bounce * buttons = new Bounce[NUM_BUTTONS]; // Create an array of button objects
 // Initialize enums
 State state = RESET_STATE; // Initialize enum and set state
 DispenseType dispenseType; // Initialize the dispense enum
+TankState largeTankState = IDLE; // Initialize the large tank state
+TankState smallTankState = IDLE; // Initialize the small tank state
 
 void setup()
 {
@@ -120,12 +122,12 @@ void buttonPoll()
 		if ( buttons[i].fell() ) {
 			if (i == NUM_BUTTONS - 1) { // Make sure drain button pin is the last one in the array
 				// Toggle the drain
-				drainTank(BOTH_TANKS); // BLOCKING, which is acceptable because we should block while draining
+				drainTank(BOTH_TANKS); // Blocking, which is acceptable because we should block while draining
         Serial << "Drain button pressed" << endl;
 			} else {
 				// Toggle the LED
-				digitalWrite(BUTTON_LIGHT_PINS[i], LOW);
-        if (i == state && i != RESET_STATE) {
+				digitalWrite(BUTTON_LIGHT_PINS[i], LOW); // Turn on the light for the button that was pressed
+        if (i == state && i != RESET_STATE) { // if the button is pressed again, drain the tank
           drainTank(i); // if the button is pressed again, drain the tank
 					return;
         }
@@ -217,19 +219,33 @@ void drainTank(int tanksToDrain)
   switch (tanksToDrain)
   {
     case LARGE_TANK:
+			if (largeTankState == DISPENSING) {
+				Serial << "Large tank is dispensing, cannot drain" << endl;
+				return;
+			}
       digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
       delay(tankDrainDuration); // Wait for the specified duration
       digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
 			//overflowCheck(LARGE_TANK); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
 			digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
-      break;
+      largeTankState = IDLE; // Set the large tank state to idle
+			break;
     case SMALL_TANK:
+			if (smallTankState == DISPENSING) {
+				Serial << "Small tank is dispensing, cannot drain" << endl;
+				return;
+			}
       drainStepper.runSpeed(); // Run the stepper motor at the specified speed
       delay(tankDrainDuration); // Wait for the specified duration. Can change drain time to be smaller if necessary
 			//overflowCheck(SMALL_TANK); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
       digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], HIGH); // Turn on the light for the small tank button
-      break;
+      smallTankState = IDLE; // Set the small tank state to idle
+			break;
     case BOTH_TANKS:
+			if (largeTankState == DISPENSING || smallTankState == DISPENSING) {
+				Serial << "One or both tanks are dispensing, cannot drain" << endl;
+				return;
+			}
       digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
       drainStepper.runSpeed(); // Run the stepper motor at the specified speed
       delay(tankDrainDuration); // Wait for the specified duration
@@ -238,7 +254,9 @@ void drainTank(int tanksToDrain)
 			//overflowCheck(BOTH_TANKS); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
       digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
       digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], HIGH); // Turn on the light for the small tank button
-      break;
+      smallTankState = IDLE; // Set the small tank state to idle
+			largeTankState = IDLE; // Set the large tank state to idle
+			break;
     default:
       Serial << "Invalid tank to drain" << endl;
       break;
@@ -283,6 +301,8 @@ void resolveOverflow(int tank) {
 			if (!(tank == LARGE_TANK || tank == BOTH_TANKS) || !digitalRead(bigTankOverflowPin)) {
 					if (!(tank == SMALL_TANK || tank == BOTH_TANKS) || !digitalRead(smallTankOverflowPin)) {
 							Serial << "Overflow resolved after " << (retry + 1) << " attempts." << endl;
+							// Check which tank it is, and set that tank to idle
+							LARGE_TANK == tank ? largeTankState = IDLE : smallTankState = IDLE;
 							return; // Overflow successfully resolved
 					}
 			}
@@ -294,13 +314,15 @@ void resolveOverflow(int tank) {
 	}
 }
 
-void overflowBigTankISR() {
+void overflowLargeTankISR() {
 	Serial << "Big tank overflow detected." << endl;
+	largeTankState = OVERFLOW;
 	resolveOverflow(LARGE_TANK);
 }
 
 void overflowSmallTankISR() {
 	Serial << "Small tank overflow detected." << endl;
+	smallTankState = OVERFLOW;
 	resolveOverflow(SMALL_TANK);
 }
 

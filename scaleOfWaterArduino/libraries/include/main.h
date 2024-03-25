@@ -24,10 +24,12 @@ void smallTankOverflowISR();
 // helper functions
 void gitPrint();
 
-// long millisToFillTank;
-// long millisAtStartOfFill;
-// long millisAtEndOfFill;
+// Global variables declaration, more config variables in config.h
 long lastButtonPressTime = 0;
+unsigned long previousMillis = 0; // Variable to store the last time the button was pressed
+
+// Flags
+bool isTimeout = false; // Flag indicating if timeout has occurred
 
 typedef enum // Code to be used in the main loop to determine the state of the system
 {
@@ -44,5 +46,12 @@ typedef enum
   LARGE_TANK,
   BOTH_TANKS
 } DispenseType;
+
+typedef enum {
+  IDLE,
+  DISPENSING,
+  DRAINING,
+  OVERFLOW
+} TankState;
 
 #endif // MAIN_H
