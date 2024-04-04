@@ -4,39 +4,39 @@
 #include <Arduino.h>
 
 //  Define pin numbers for stepper motor CHANGE ALL PINS
-const int stpPinHandDropStepper = 2; //
-const int dirPinHandDropStepper = 5;
-const int enPinHandDropStepper = 13;
+const int stpPinHandDropStepper = 10;
+const int dirPinHandDropStepper = 11;
+const int enPinHandDropStepper = 15;
 
-const int stpPinSmallTankStepper = 4;
-const int dirPinSmallTankStepper = 7; //
-const int enPinSmallTankStepper = 8; //
+const int stpPinSmallTankStepper = 2;
+const int dirPinSmallTankStepper = 3;
+const int enPinSmallTankStepper = 7;
 
-const int stpPinDrainStepper = 3; //
-const int dirPinDrainStepper = 6; //
-const int enPinDrainStepper = 12;
+const int stpPinDrainStepper = 8;
+const int dirPinDrainStepper = 9;
+const int enPinDrainStepper = 13;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-const int drainBigTankRelayPin = A3; // this is a define because Arduino.h isn't included in this file, but its same as other pin definitions
-const int sumpPumpRelayPin = A5; // CHANGE PIN
+const int drainBigTankRelayPin = 23;
+const int sumpPumpRelayPin = 43;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-const int bigTankOverflowPin = A6; // CHANGE PIN
-const int smallTankOverflowPin = A7; // CHANGE PIN
+const int bigTankOverflowPin = 18;
+const int smallTankOverflowPin = 19;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Define pin number for button
 #define NUM_BUTTONS 4
-const int bigDropButtonPin = 9; // CHANGE PIN
-const int smallDropButtonPin = 10; // CHANGE PIN
-const int handDropButtonPin = 11; // CHANGE PIN
-const int drainButtonPin = A4; // CHANGE PIN (no LED) (Interrupt?)
-const uint8_t BUTTON_PINS[NUM_BUTTONS] = {bigDropButtonPin, smallDropButtonPin, handDropButtonPin, drainButtonPin};
+const int handDropButtonPin = 33;
+const int smallDropButtonPin = 35;
+const int bigDropButtonPin = 37;
+const int drainButtonPin = 39;
+const uint8_t BUTTON_PINS[NUM_BUTTONS] = {handDropButtonPin, smallDropButtonPin, bigDropButtonPin, drainButtonPin};
 
 // Define pin numbers for button lights
 #define NUM_BUTTON_LIGHTS 3
-const int bigDropButtonLightPin = A0; // CHANGE PIN
-const int smallDropButtonLightPin = A1; // CHANGE PIN
-const int handDropButtonLightPin = A2; // CHANGE PIN
-const uint8_t BUTTON_LIGHT_PINS[NUM_BUTTON_LIGHTS] = {bigDropButtonLightPin, smallDropButtonLightPin, handDropButtonLightPin};
+const int handDropButtonLightPin = 32;
+const int smallDropButtonLightPin = 34;
+const int bigDropButtonLightPin = 36;
+const uint8_t BUTTON_LIGHT_PINS[NUM_BUTTON_LIGHTS] = {smallDropButtonLightPin, bigDropButtonLightPin, handDropButtonLightPin};
 
 // CONFIG ITEMS, NOT PINS
 // Define steps per revolution and mLs per revolution
