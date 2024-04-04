@@ -76,6 +76,11 @@ void setupSteppers()
 	drainStepper.setEnablePin(enPinDrainStepper); // Set enable pin for drain stepper motor
 	drainStepper.setMaxSpeed(maxSpeedDrainStepper); // Set maximum speed for drain stepper motor
 	drainStepper.setSpeed(maxSpeedDrainStepper); // Set speed for drain stepper motor
+
+	handDropStepper.disableOutputs();
+	smallTankStepper.disableOutputs();
+	drainStepper.disableOutputs();
+
 }
 
 /* Commenting out for now to worry about calibration later
@@ -139,7 +144,7 @@ void buttonPoll()
 }
 
 // Function to dispense X mL in the specified direction
-void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev, int speed)
+void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev)
 {
 	stepper.enableOutputs(); // Enable the stepper motor outputs
 	// Calculate the number of steps required to dispense the specified uL
@@ -172,13 +177,13 @@ void dispense()
     {
     case HAND_DROP_STATE:
       Serial << "Hand drop state" << endl;
-      stepperDispense(handDropStepper, handDropVolume, true, uLsPerRevSmallStepper, maxSpeedHandDropStepper);
+      stepperDispense(handDropStepper, handDropVolume, true, uLsPerRevSmallStepper);
       digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn on the light for the hand drop button after dispensing
       break;
     case SMALL_DROP_STATE:
       digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], LOW); // Turn off the light for the small tank button to show that its full
       Serial << "Small tank drop state" << endl;
-      stepperDispense(smallTankStepper, smallTankVolume, true, uLsPerRevBigStepper, maxSpeedSmallTankStepper);
+      stepperDispense(smallTankStepper, smallTankVolume, true, uLsPerRevBigStepper);
       break;
     case BIG_DROP_STATE:
       digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], LOW); // Turn off the light for the large tank button to show that its full
@@ -296,7 +301,7 @@ void resolveOverflow(int tank) {
 	for (int retry = 0; retry < maxRetries; ++retry) {
 			drainTank(tank);  // Attempt to drain the tank(s)
 			delay(delayDuration);  // Wait before rechecking
-
+		/*
 			// Recheck for overflow condition
 			if (!(tank == LARGE_TANK || tank == BOTH_TANKS) || !digitalRead(bigTankOverflowPin)) {
 					if (!(tank == SMALL_TANK || tank == BOTH_TANKS) || !digitalRead(smallTankOverflowPin)) {
@@ -306,6 +311,7 @@ void resolveOverflow(int tank) {
 							return; // Overflow successfully resolved
 					}
 			}
+		*/
 	}
 	Serial << "Overflow could not be resolved after " << maxRetries << " attempts. Stopping program." << endl;
 	while(1) {

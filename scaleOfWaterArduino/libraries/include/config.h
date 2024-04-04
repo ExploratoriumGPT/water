@@ -19,8 +19,8 @@ const int enPinDrainStepper = 13;
 const int drainBigTankRelayPin = 23;
 const int sumpPumpRelayPin = 43;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-const int bigTankOverflowPin = 18;
-const int smallTankOverflowPin = 19;
+// const int bigTankOverflowPin = 18;
+// const int smallTankOverflowPin = 19;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Define pin number for button
@@ -53,11 +53,11 @@ const int uLsPerRevBigStepper = 3190;   /////////////////////////////////////// 
 const int mLsPerSecondSumpPump = 420; //  How many mLs per second the sump pump dispenses
 
 // Define maximum speed and acceleration for the stepper motors
-const int maxSpeedHandDropStepper = 8 * 560000; // 350*1600 per datasheet; NOTE: THIS IS OVER THE MAXIMUM VALUE FOR AN INT
-const int maxAccelHandDropStepper = maxSpeedHandDropStepper;
-const int maxSpeedSmallTankStepper = maxSpeedHandDropStepper;
-const int maxAccelSmallTankStepper = maxSpeedHandDropStepper;
-const int maxSpeedDrainStepper = maxSpeedHandDropStepper; // no acceleration for drain stepper
+const float maxSpeedHandDropStepper = 560000; // 350*1600 per datasheet; NOTE: THIS IS OVER THE MAXIMUM VALUE FOR AN INT
+const float maxAccelHandDropStepper = maxSpeedHandDropStepper;
+const float maxSpeedSmallTankStepper = maxSpeedHandDropStepper;
+const float maxAccelSmallTankStepper = maxSpeedHandDropStepper;
+const float maxSpeedDrainStepper = maxSpeedHandDropStepper; // no acceleration for drain stepper
 
 // Define debounce interval for button
 const int debounceInterval = 50; // Debounce interval for button
