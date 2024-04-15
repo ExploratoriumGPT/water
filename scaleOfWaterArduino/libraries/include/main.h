@@ -1,14 +1,57 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-// void stepperDispense(long uL, bool forward, long uLsPerRev, int speed);
-void setupAllSteppers();
-void gitPrint();
-void calibrateSumpPump();
-void timeout();
-void exhibitRoutine();
-void sumpPumpDispense(int mLs);
-//void calibratePump();
+#include <AccelStepper.h> // Include the AccelStepper library. Necessary for declarations
 
+// Main functions, in rough order of appearance
+// setup functions
+void setupButtons();
+void setupSteppers();
+// calibrate functions
+void calibrateSumpPump();
+void calibratePump(AccelStepper stepper, bool forward);
+// main loop functions
+void buttonPoll();
+void stepperDispense(AccelStepper stepper, long steps, bool dir, float uLsPerRev, float maxSpeed);
+void timeout();
+void dispense();
+void sumpPumpDispense(int mLs);
+void drainTank(int tank);
+void overflowCheck(int tank); // Currently redundant with ISR, but may be useful in the future if we want a full check
+void resolveOverflow(int tank);
+void bigTankOverflowISR();
+void smallTankOverflowISR();
+// helper functions
+void gitPrint();
+
+// Global variables declaration, more config variables in config.h
+long lastButtonPressTime = 0;
+unsigned long previousMillis = 0; // Variable to store the last time the button was pressed
+
+// Flags
+bool isTimeout = false; // Flag indicating if timeout has occurred
+
+typedef enum // Code to be used in the main loop to determine the state of the system
+{
+  HAND_DROP_STATE,
+  SMALL_DROP_STATE,
+  BIG_DROP_STATE,
+  RESET_STATE
+} State;
+
+typedef enum 
+{
+  HAND_DROP, // Note: not used but included for consistency with other enum
+  SMALL_TANK,
+  LARGE_TANK,
+  BOTH_TANKS
+} DispenseType;
+
+typedef enum {
+  IDLE,
+  DISPENSING,
+  DRAINING,
+  OVERFLOW
+} TankState;
 
 #endif // MAIN_H
