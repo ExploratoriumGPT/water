@@ -8,10 +8,6 @@ const int stpPinHandDropStepper = 10;
 const int dirPinHandDropStepper = 11;
 const int enPinHandDropStepper = 15;
 
-const int stpPinSmallTankStepper = 2;
-const int dirPinSmallTankStepper = 3;
-const int enPinSmallTankStepper = 7;
-
 const int stpPinDrainStepper = 8;
 const int dirPinDrainStepper = 9;
 const int enPinDrainStepper = 13;
@@ -24,19 +20,17 @@ const int sumpPumpRelayPin = 43;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Define pin number for button
-#define NUM_BUTTONS 4
+#define NUM_BUTTONS 3
 const int handDropButtonPin = 33;
-const int smallDropButtonPin = 35;
 const int bigDropButtonPin = 37;
 const int drainButtonPin = 39;
-const uint8_t BUTTON_PINS[NUM_BUTTONS] = {handDropButtonPin, smallDropButtonPin, bigDropButtonPin, drainButtonPin};
+const uint8_t BUTTON_PINS[NUM_BUTTONS] = {handDropButtonPin, bigDropButtonPin, drainButtonPin};
 
 // Define pin numbers for button lights
-#define NUM_BUTTON_LIGHTS 3
+#define NUM_BUTTON_LIGHTS 2
 const int handDropButtonLightPin = 32;
-const int smallDropButtonLightPin = 34;
 const int bigDropButtonLightPin = 36;
-const uint8_t BUTTON_LIGHT_PINS[NUM_BUTTON_LIGHTS] = {smallDropButtonLightPin, bigDropButtonLightPin, handDropButtonLightPin};
+const uint8_t BUTTON_LIGHT_PINS[NUM_BUTTON_LIGHTS] = {handDropButtonLightPin, bigDropButtonLightPin};
 
 // CONFIG ITEMS, NOT PINS
 // Define steps per revolution and mLs per revolution

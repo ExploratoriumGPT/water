@@ -16,11 +16,10 @@ void stepperDispense(AccelStepper stepper, long steps, bool dir, float uLsPerRev
 void timeout();
 void dispense();
 void sumpPumpDispense(int mLs);
-void drainTank(int tank);
+void drainTank();
 void overflowCheck(int tank); // Currently redundant with ISR, but may be useful in the future if we want a full check
 void resolveOverflow(int tank);
 void bigTankOverflowISR();
-void smallTankOverflowISR();
 // helper functions
 void gitPrint();
 
@@ -34,7 +33,6 @@ bool isTimeout = false; // Flag indicating if timeout has occurred
 typedef enum // Code to be used in the main loop to determine the state of the system
 {
   HAND_DROP_STATE,
-  SMALL_DROP_STATE,
   BIG_DROP_STATE,
   RESET_STATE
 } State;
@@ -42,7 +40,6 @@ typedef enum // Code to be used in the main loop to determine the state of the s
 typedef enum 
 {
   HAND_DROP, // Note: not used but included for consistency with other enum
-  SMALL_TANK,
   LARGE_TANK,
   BOTH_TANKS
 } DispenseType;
