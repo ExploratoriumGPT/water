@@ -4,13 +4,10 @@
 #include <Arduino.h>
 
 //  Define pin numbers for stepper motor CHANGE ALL PINS
-const int stpPinHandDropStepper = 10;
-const int dirPinHandDropStepper = 11;
-const int enPinHandDropStepper = 15;
+const int stpPinHandDropStepper = 8;
+const int dirPinHandDropStepper = 9;
+const int enPinHandDropStepper = 13;
 
-const int stpPinDrainStepper = 8;
-const int dirPinDrainStepper = 9;
-const int enPinDrainStepper = 13;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const int drainBigTankRelayPin = 23;
 const int sumpPumpRelayPin = 43;
@@ -47,9 +44,6 @@ const int mLsPerSecondSumpPump = 420; //  How many mLs per second the sump pump 
 // Define maximum speed and acceleration for the stepper motors
 const float maxSpeedHandDropStepper = 560000; // 350*1600 per datasheet; NOTE: THIS IS OVER THE MAXIMUM VALUE FOR AN INT
 const float maxAccelHandDropStepper = maxSpeedHandDropStepper;
-const float maxSpeedSmallTankStepper = maxSpeedHandDropStepper;
-const float maxAccelSmallTankStepper = maxSpeedHandDropStepper;
-const float maxSpeedDrainStepper = maxSpeedHandDropStepper; // no acceleration for drain stepper
 
 // Define debounce interval for button
 const int debounceInterval = 50; // Debounce interval for button

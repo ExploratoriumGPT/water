@@ -12,7 +12,6 @@
 
 // Create instances of AccelStepper and Bounce objects
 AccelStepper handDropStepper(AccelStepper::DRIVER, stpPinHandDropStepper, dirPinHandDropStepper);
-AccelStepper drainStepper(AccelStepper::DRIVER, stpPinDrainStepper, dirPinDrainStepper);
 Bounce * buttons = new Bounce[NUM_BUTTONS]; // Create an array of button objects
 
 // Initialize enums
@@ -66,14 +65,7 @@ void setupSteppers()
 	handDropStepper.setEnablePin(enPinHandDropStepper); // Set enable pin for little stepper motor
 	handDropStepper.setMaxSpeed(maxSpeedHandDropStepper); // Set maximum speed for little stepper motor
 	handDropStepper.setAcceleration(maxAccelHandDropStepper); // Set acceleration for little stepper motor
-
-	drainStepper.setEnablePin(enPinDrainStepper); // Set enable pin for drain stepper motor
-	drainStepper.setMaxSpeed(maxSpeedDrainStepper); // Set maximum speed for drain stepper motor
-	drainStepper.setSpeed(maxSpeedDrainStepper); // Set speed for drain stepper motor
-
 	handDropStepper.disableOutputs();
-	drainStepper.disableOutputs();
-
 }
 
 /* Commenting out for now to worry about calibration later
@@ -207,7 +199,6 @@ void drainTank()
 	//overflowCheck(LARGE_TANK); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
 	digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
 	largeTankState = IDLE; // Set the large tank state to idle
-	drainStepper.disableOutputs(); // Disable the stepper motor outputs for the drain stepper
 	state = RESET_STATE;
 }
 /*
