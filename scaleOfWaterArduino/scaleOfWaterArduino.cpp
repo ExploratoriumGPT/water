@@ -6,7 +6,7 @@
 #ifdef PLATFORMIO
   #include <git_info.h>  // Library for printing git information
 #endif
-// Local files
+// Local files. May be confusion because they are located in libraries folder, but this is because this is how arduino IDE needs it
 #include "libraries/include/main.h" // Header file for scaleOfWaterArduino.ino
 #include "libraries/include/config.h" // Header file for pin definitions and configuration items
 
@@ -53,7 +53,7 @@ void setupButtons()
 	}
 
 	//Setup LED pins
-	for (int i = 0; i < NUM_BUTTON_LIGHTS; i++) {
+	for (int i = 0; i < NUM_BUTTONS; i++) {
 		pinMode(BUTTON_LIGHT_PINS[i], OUTPUT); // set the LED pin to output
 		digitalWrite(BUTTON_LIGHT_PINS[i], HIGH); // initialize the LED in high state
 	}
@@ -118,22 +118,14 @@ void buttonPoll()
 		buttons[i].update();
 		// If it rose (was pressed), flag the need to toggle the LED
 		if (buttons[i].rose()) { // If the button in the for loop was pressed
-			if (i == NUM_BUTTONS - 1) { // Make sure drain button pin is the last one in the array
-				// Toggle the drain
-				Serial << "Drain button pressed" << endl;
-				drainTank(); // Blocking, which is acceptable because we should block while draining
-			} 
-			else // If it's not the drain button, it's a dispensing button
-			{ 
-				// Toggle the LED
-				digitalWrite(BUTTON_LIGHT_PINS[i], LOW); // Turn on the light for the button that was pressed
-        if (i == state && i != RESET_STATE) { // if the button is pressed again, drain the tank
-          drainTank(); // if the button is pressed again, drain the tank
-					return;
-        }
-				state = static_cast<State>(i); // set the state to the button that was pressed
-        lastButtonPressTime = millis(); // update the last button press time for timeout
+			// Toggle the LED
+			digitalWrite(BUTTON_LIGHT_PINS[i], LOW); // Turn on the light for the button that was pressed
+			if (i == state && i != RESET_STATE) { // if the button is pressed again, drain the tank
+				drainTank(); // if the button is pressed again, drain the tank
+				return;
 			}
+		state = static_cast<State>(i); // set the state to the button that was pressed
+		lastButtonPressTime = millis(); // update the last button press time for timeout
 		}
 	}
 }
@@ -169,7 +161,7 @@ void dispense()
 {
 		Serial << "Button press, current state: " << state << endl;
     switch (state)
-    {
+  {
     case HAND_DROP_STATE:
       Serial << "Hand drop state" << endl;
       stepperDispense(handDropStepper, handDropVolume, true, uLsPerRevSmallStepper);
