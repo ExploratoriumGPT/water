@@ -24,14 +24,14 @@ TankState smallTankState = IDLE; // Initialize the small tank state
 
 void setup()
 {
-	Serial2.begin(9600);
-	Serial2 << F("All further Serial2 debug will be at 115,200 baud") << endl;
+	Serial.begin(9600);
+	Serial << F("All further serial debug will be at 115,200 baud") << endl;
 	delay(1000);
-	Serial2.begin(115200);
-	Serial2 << F("Starting setup") << endl;
+	Serial.begin(115200);
+	Serial << F("Starting setup") << endl;
 
 	#ifdef PLATFORMIO
-		gitPrint(); //prints git info to the Serial2 monitor
+		gitPrint(); //prints git info to the serial monitor
 	#endif
 
   drainTank(BOTH_TANKS); // Drain both tanks
@@ -90,14 +90,14 @@ void calibrateSumpPump()
 	{
 		digitalWrite(bigPumpEnablePin, HIGH);
 		millisAtStartOfFill = millis();
-		Serial2 << "button down!" << endl;
+		Serial << "button down!" << endl;
 	}
 	else if (button.rose())
 	{
 		digitalWrite(bigPumpEnablePin, LOW);
 		millisAtEndOfFill = millis();
 		millisToFillTank = millisAtEndOfFill - millisAtStartOfFill;
-		Serial2 << "millisToFillTank: " << millisToFillTank << endl;
+		Serial << "millisToFillTank: " << millisToFillTank << endl;
 	}
 } 
 
@@ -105,7 +105,7 @@ void calibratePump(AccelStepper stepper, bool forward)
 {
 	int revs = 10;
 	int steps = revs * stepsPerRev;
-	Serial2 << "Calibrating pump... " << "spinning " << revs << " revs (" << steps << " steps) " 
+	Serial << "Calibrating pump... " << "spinning " << revs << " revs (" << steps << " steps) " 
 	<< (forward ? "forwards... " : "backwards... ") << endl;
 	digitalWrite(enablePin, LOW);
 	stepper.move(forward ? -steps : steps);
@@ -114,7 +114,7 @@ void calibratePump(AccelStepper stepper, bool forward)
 		stepper.run();
 	}
 	digitalWrite(enablePin, HIGH); // turn them off to save power
-	Serial2 << " done. note volume dispensed and divide by 10 to get uL per rev" << endl;
+	Serial << " done. note volume dispensed and divide by 10 to get uL per rev" << endl;
 }
 */
 
@@ -128,7 +128,7 @@ void buttonPoll()
 			if (i == NUM_BUTTONS - 1) { // Make sure drain button pin is the last one in the array
 				// Toggle the drain
 				drainTank(BOTH_TANKS); // Blocking, which is acceptable because we should block while draining
-        Serial2 << "Drain button pressed" << endl;
+        Serial << "Drain button pressed" << endl;
 			} else {
 				// Toggle the LED
 				digitalWrite(BUTTON_LIGHT_PINS[i], LOW); // Turn on the light for the button that was pressed
@@ -149,7 +149,7 @@ void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev
 	stepper.enableOutputs(); // Enable the stepper motor outputs
 	// Calculate the number of steps required to dispense the specified uL
 	int steps = round((float)uL / uLsPerRev * stepsPerRev);
-	Serial2 << "Dispensing " << uL << " uL (" << steps << " steps) " << (forward ? "forwards... " : "backwards... ") << endl;
+	Serial << "Dispensing " << uL << " uL (" << steps << " steps) " << (forward ? "forwards... " : "backwards... ") << endl;
 	stepper.move(forward ? -steps : steps); // Move the stepper motor forward or backward by the specified number of steps
 	// Run the stepper motor until it reaches the target position ////blocking code
   if (stepper.distanceToGo() != 0) {
@@ -158,42 +158,42 @@ void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev
     stepper.disableOutputs(); // Call this once the movement is complete
   }
 
-	Serial2.println(" done");
+	Serial.println(" done");
 }
 
 void timeout()
 {
 	if (lastButtonPressTime > timeoutMillis)
 	{
-		Serial2 << "Timeout" << endl;
+		Serial << "Timeout" << endl;
 		drainTank(BOTH_TANKS);
 	}
 }
 
 void dispense()
 {
-		Serial2 << "Button press, current state: " << state << endl;
+		Serial << "Button press, current state: " << state << endl;
     switch (state)
     {
     case HAND_DROP_STATE:
-      Serial2 << "Hand drop state" << endl;
+      Serial << "Hand drop state" << endl;
       stepperDispense(handDropStepper, handDropVolume, true, uLsPerRevSmallStepper);
       digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn on the light for the hand drop button after dispensing
       break;
     case SMALL_DROP_STATE:
       digitalWrite(BUTTON_LIGHT_PINS[SMALL_TANK], LOW); // Turn off the light for the small tank button to show that its full
-      Serial2 << "Small tank drop state" << endl;
+      Serial << "Small tank drop state" << endl;
       stepperDispense(smallTankStepper, smallTankVolume, true, uLsPerRevBigStepper);
       break;
     case BIG_DROP_STATE:
       digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], LOW); // Turn off the light for the large tank button to show that its full
-      Serial2 << "Big tank drop state" << endl;
+      Serial << "Big tank drop state" << endl;
       sumpPumpDispense(bigTankVolume);
       break;
 		case RESET_STATE:
 			break;
     default:
-      Serial2 << "Invalid state" << endl;
+      Serial << "Invalid state" << endl;
       break;
 	}
 	state = RESET_STATE;
@@ -203,18 +203,18 @@ void sumpPumpDispense(int mLs)
 {
 	const unsigned long sumpDelay = (mLs / mLsPerSecondSumpPump * 1000);
 	unsigned long currentMillis = millis();
-	Serial2 << "Dispensing " << mLs << " mLs sump pump... " << endl;
+	Serial << "Dispensing " << mLs << " mLs sump pump... " << endl;
 	digitalWrite(sumpPumpRelayPin, HIGH);
 	if (currentMillis - previousMillis >= sumpDelay) {
 		digitalWrite(sumpPumpRelayPin, LOW);
-		Serial2 << "Done Pumping Sump Pump" << endl;
+		Serial << "Done Pumping Sump Pump" << endl;
 		previousMillis = currentMillis;
 	}
 }
 
 void drainTank(int tanksToDrain)
 {
-  Serial2 << "Draining tank (3 is both) " << tanksToDrain << endl;
+  Serial << "Draining tank (3 is both) " << tanksToDrain << endl;
 	drainStepper.enableOutputs(); // Enable the stepper motor outputs for the drain stepper
 
 	for (int i = 0; i < NUM_BUTTON_LIGHTS; i++) {
@@ -225,7 +225,7 @@ void drainTank(int tanksToDrain)
   {
     case LARGE_TANK:
 			if (largeTankState == DISPENSING) {
-				Serial2 << "Large tank is dispensing, cannot drain" << endl;
+				Serial << "Large tank is dispensing, cannot drain" << endl;
 				return;
 			}
       digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
@@ -237,7 +237,7 @@ void drainTank(int tanksToDrain)
 			break;
     case SMALL_TANK:
 			if (smallTankState == DISPENSING) {
-				Serial2 << "Small tank is dispensing, cannot drain" << endl;
+				Serial << "Small tank is dispensing, cannot drain" << endl;
 				return;
 			}
       drainStepper.runSpeed(); // Run the stepper motor at the specified speed
@@ -248,7 +248,7 @@ void drainTank(int tanksToDrain)
 			break;
     case BOTH_TANKS:
 			if (largeTankState == DISPENSING || smallTankState == DISPENSING) {
-				Serial2 << "One or both tanks are dispensing, cannot drain" << endl;
+				Serial << "One or both tanks are dispensing, cannot drain" << endl;
 				return;
 			}
       digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
@@ -263,7 +263,7 @@ void drainTank(int tanksToDrain)
 			largeTankState = IDLE; // Set the large tank state to idle
 			break;
     default:
-      Serial2 << "Invalid tank to drain" << endl;
+      Serial << "Invalid tank to drain" << endl;
       break;
   }
 	drainStepper.disableOutputs(); // Disable the stepper motor outputs for the drain stepper
@@ -276,14 +276,14 @@ void overflowCheck(int tank) { // Currently redundant with ISR, but may be usefu
     // Check for overflow based on the tank type
     if (tank == LARGE_TANK || tank == BOTH_TANKS) {
         if (digitalRead(bigTankOverflowPin)) {
-            Serial2 << "Big tank overflow detected." << endl;
+            Serial << "Big tank overflow detected." << endl;
             overflowDetected = true;
         }
     }
 
     if (tank == SMALL_TANK || tank == BOTH_TANKS) {
         if (digitalRead(smallTankOverflowPin)) {
-            Serial2 << "Small tank overflow detected." << endl;
+            Serial << "Small tank overflow detected." << endl;
             overflowDetected = true;
         }
     }
@@ -305,7 +305,7 @@ void resolveOverflow(int tank) {
 			// Recheck for overflow condition
 			if (!(tank == LARGE_TANK || tank == BOTH_TANKS) || !digitalRead(bigTankOverflowPin)) {
 					if (!(tank == SMALL_TANK || tank == BOTH_TANKS) || !digitalRead(smallTankOverflowPin)) {
-							Serial2 << "Overflow resolved after " << (retry + 1) << " attempts." << endl;
+							Serial << "Overflow resolved after " << (retry + 1) << " attempts." << endl;
 							// Check which tank it is, and set that tank to idle
 							LARGE_TANK == tank ? largeTankState = IDLE : smallTankState = IDLE;
 							return; // Overflow successfully resolved
@@ -313,28 +313,28 @@ void resolveOverflow(int tank) {
 			}
 		*/
 	}
-	Serial2 << "Overflow could not be resolved after " << maxRetries << " attempts. Stopping program." << endl;
+	Serial << "Overflow could not be resolved after " << maxRetries << " attempts. Stopping program." << endl;
 	while(1) {
-		Serial2 << "Program Stop due to overflow" << endl;
+		Serial << "Program Stop due to overflow" << endl;
 		delay(5000);
 	}
 }
 
 void overflowLargeTankISR() {
-	Serial2 << "Big tank overflow detected." << endl;
+	Serial << "Big tank overflow detected." << endl;
 	largeTankState = OVERFLOW;
 	resolveOverflow(LARGE_TANK);
 }
 
 void overflowSmallTankISR() {
-	Serial2 << "Small tank overflow detected." << endl;
+	Serial << "Small tank overflow detected." << endl;
 	smallTankState = OVERFLOW;
 	resolveOverflow(SMALL_TANK);
 }
 
 #ifdef PLATFORMIO //if using platformio, print git information
-void gitPrint() { //prints git information to the Serial2 monitor using the Streaming library
-  Serial2 << F("Git Information:\n")
+void gitPrint() { //prints git information to the serial monitor using the Streaming library
+  Serial << F("Git Information:\n")
   << F("Build Date/Time (local time): ") << BUILD_DATE << F("\n")
   << F("Builder's Name:  ") << GIT_USER_NAME << F(" Email: ") << GIT_USER_EMAIL  << F("\n")
   << F("Repository URL: ") << GIT_REPO_URL << F("\n")
