@@ -117,12 +117,14 @@ void buttonPoll()
 		// Update the Bounce instance :
 		buttons[i].update();
 		// If it rose (was pressed), flag the need to toggle the LED
-		if ( buttons[i].rose() ) {
+		if (buttons[i].rose()) { // If the button in the for loop was pressed
 			if (i == NUM_BUTTONS - 1) { // Make sure drain button pin is the last one in the array
 				// Toggle the drain
+				Serial << "Drain button pressed" << endl;
 				drainTank(); // Blocking, which is acceptable because we should block while draining
-        Serial << "Drain button pressed" << endl;
-			} else {
+			} 
+			else // If it's not the drain button, it's a dispensing button
+			{ 
 				// Toggle the LED
 				digitalWrite(BUTTON_LIGHT_PINS[i], LOW); // Turn on the light for the button that was pressed
         if (i == state && i != RESET_STATE) { // if the button is pressed again, drain the tank
@@ -172,6 +174,7 @@ void dispense()
       Serial << "Hand drop state" << endl;
       stepperDispense(handDropStepper, handDropVolume, true, uLsPerRevSmallStepper);
       digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn on the light for the hand drop button after dispensing
+			state = RESET_STATE;
       break;
 		case BIG_DROP_STATE:
       digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], LOW); // Turn off the light for the large tank button to show that its full
@@ -179,12 +182,11 @@ void dispense()
       sumpPumpDispense(bigTankVolume);
       break;
 		case RESET_STATE:
-			break;
+			return;
     default:
       Serial << "Invalid state" << endl;
       break;
 	}
-	state = RESET_STATE;
 }
 
 void sumpPumpDispense(int mLs)
