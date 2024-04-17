@@ -4,13 +4,13 @@
 #include <Arduino.h>
 
 //  Define pin numbers for stepper motor CHANGE ALL PINS
-const int stpPinHandDropStepper = 8;
-const int dirPinHandDropStepper = 9;
-const int enPinHandDropStepper = 13;
+const int stpPinHandDropStepper = 10;
+const int dirPinHandDropStepper = 11;
+const int enPinHandDropStepper = 15;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-const int drainBigTankRelayPin = 23;
-const int sumpPumpRelayPin = 43;
+const int drainBigTankRelayPin = 23; // G-BRK P7
+const int sumpPumpRelayPin = 43; // G-REL P4
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // const int bigTankOverflowPin = 18;
 // const int smallTankOverflowPin = 19;
@@ -18,18 +18,18 @@ const int sumpPumpRelayPin = 43;
 
 // Define pin number for button
 #define NUM_BUTTONS 2
-const int handDropButtonPin = 33;
-const int bigDropButtonPin = 37;
+const int handDropButtonPin = 33; // G-BUT-3 P1
+const int bigDropButtonPin = 35; // G-BUT-3 P3
 const uint8_t BUTTON_PINS[NUM_BUTTONS] = {handDropButtonPin, bigDropButtonPin};
 
 // Define pin numbers for button lights
-const int handDropButtonLightPin = 32;
-const int bigDropButtonLightPin = 36;
+const int handDropButtonLightPin = 32; // G-BUT-3 P0
+const int bigDropButtonLightPin = 34; // G-BUT-3 P2
 const uint8_t BUTTON_LIGHT_PINS[NUM_BUTTONS] = {handDropButtonLightPin, bigDropButtonLightPin};
 
 // CONFIG ITEMS, NOT PINS
 // Define steps per revolution and mLs per revolution
-const int stepsPerRev = 1600;           // with 8x microstepping (200 steps per rev)
+const int stepsPerRev = 200;           // with no microstepping (200 steps per rev)
 
 const int handDropVolume = 647; // 0.65 mL
 

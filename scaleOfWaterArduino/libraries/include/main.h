@@ -22,6 +22,10 @@ void resolveOverflow(int tank);
 void bigTankOverflowISR();
 // helper functions
 void gitPrint();
+// Test functions
+void testDrain();
+void testSumpPump();
+void testStepperDispense();
 
 // Global variables declaration, more config variables in config.h
 long lastButtonPressTime = 0;
