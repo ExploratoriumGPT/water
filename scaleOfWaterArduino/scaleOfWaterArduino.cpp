@@ -34,16 +34,19 @@ void setup()
   drainTank(); // Drain both tanks
 	setupButtons(); // Set up the buttons and button lights
 	setupSteppers(); // Set up the stepper motors
-	pinMode(drainBigTankRelayPin, OUTPUT); // Set the relay pin to output
+	pinMode(drainRelayPin, OUTPUT); // Set the relay pin to output
 	pinMode(sumpPumpRelayPin, OUTPUT); // Set the relay pin to output
 }
 
 void loop()
 {
 	//buttonPoll();
+	//drainTank();
+	//delay(5000);
 	//dispense();
 	//timeout();
-	testDrain();
+	//testDrain();
+	testStepperDispense();
 }
 
 void setupButtons()
@@ -198,9 +201,9 @@ void drainTank()
 		return; // Do not drain if the large tank is dispensing, returns out of function
 	}
 	Serial << "Draining tank" << endl;
-	digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
-	delay(tankDrainDuration); // Wait for the specified duration
-	digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
+	digitalWrite(drainRelayPin, HIGH); // Turn on the relay to drain the big tank
+	delay(tankDrainDuration); // Wait for the specified duration, blocking
+	digitalWrite(drainRelayPin, LOW); // Turn off the relay to close the valve
 	//overflowCheck(LARGE_TANK); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
 	digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
 	largeTankState = IDLE; // Set the large tank state to idle
@@ -278,9 +281,9 @@ void gitPrint() { //prints git information to the serial monitor using the Strea
 
 void testDrain() {
 	Serial << "Test Draining tank" << endl;
-	digitalWrite(drainBigTankRelayPin, HIGH); // Turn on the relay to drain the big tank
+	digitalWrite(drainRelayPin, HIGH); // Turn on the relay to drain the big tank
 	delay(5000); // Wait for the specified duration
-	digitalWrite(drainBigTankRelayPin, LOW); // Turn off the relay to close the valve
+	digitalWrite(drainRelayPin, LOW); // Turn off the relay to close the valve
 	Serial << "Tank drained" << endl;
 }
 
@@ -296,9 +299,10 @@ void testStepperDispense() {
 	Serial << "Test Stepper Dispense, 5 rev" << endl;
 	handDropStepper.enableOutputs(); // Enable the stepper motor outputs
 	// Calculate the number of steps required to dispense the specified uL
-	handDropStepper.move(stepsPerRev*5); // Move the stepper motor forward or backward by the specified number of steps
+	handDropStepper.move(stepsPerRev*100); // Move the stepper motor forward or backward by the specified number of steps
 	while (handDropStepper.distanceToGo() != 0) {
 			handDropStepper.run(); // Run the stepper motor until it reaches the target position
 	}
 	Serial << "Done Stepper Dispense" << endl;
+	delay(5000);
 }
