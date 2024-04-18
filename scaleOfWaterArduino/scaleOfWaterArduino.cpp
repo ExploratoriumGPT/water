@@ -45,8 +45,8 @@ void loop()
 	//dispense();
 	//timeout();
 	//testDrain();
-	testSumpPump();
-	//testStepperDispense();
+	//testSumpPump();
+	testStepperDispense();
 }
 
 void setupButtons()
@@ -70,10 +70,11 @@ void setupButtons()
 // Function to set up all stepper motors for AccelStepper library
 void setupSteppers()
 {
-	handDropStepper.setEnablePin(enPinHandDropStepper); // Set enable pin for little stepper motor
+	//handDropStepper.setEnablePin(enPinHandDropStepper); // Set enable pin for little stepper motor
 	handDropStepper.setMaxSpeed(maxSpeedHandDropStepper); // Set maximum speed for little stepper motor
 	handDropStepper.setAcceleration(maxAccelHandDropStepper); // Set acceleration for little stepper motor
-	handDropStepper.disableOutputs();
+	handDropStepper.setSpeed(speedHandDropStepper); // Set speed for little stepper motor
+	//handDropStepper.disableOutputs();
 }
 
 /* Commenting out for now to worry about calibration later
@@ -304,13 +305,15 @@ void testSumpPump() {
 }
 
 void testStepperDispense() {
-	Serial << "Test Stepper Dispense, 5 rev" << endl;
-	handDropStepper.enableOutputs(); // Enable the stepper motor outputs
+	pinMode(enPinHandDropStepper, OUTPUT);
+	digitalWrite(enPinHandDropStepper, HIGH);
+	Serial << "Test Stepper Dispense, 2 rev" << endl;
+	//handDropStepper.enableOutputs(); // Enable the stepper motor outputs
 	// Calculate the number of steps required to dispense the specified uL
-	handDropStepper.move(stepsPerRev*100); // Move the stepper motor forward or backward by the specified number of steps
+	handDropStepper.move(stepsPerRev*8); // Move the stepper motor forward or backward by the specified number of steps
 	while (handDropStepper.distanceToGo() != 0) {
 			handDropStepper.run(); // Run the stepper motor until it reaches the target position
 	}
 	Serial << "Done Stepper Dispense" << endl;
-	delay(5000);
+	delay(1000);
 }
