@@ -9,8 +9,8 @@ const int dirPinHandDropStepper = 11;
 const int enPinHandDropStepper = 15;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-const int drainRelayPin = 23; // G-BRK P7
-const int sumpPumpRelayPin = 42; // G-REL (32+8+3)
+const int drainRelayPin = 42; // G-REL (32+8+3)
+const int sumpPumpRelayPin = 23; // G-BRK (32+7)
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // const int bigTankOverflowPin = 18;
 // const int smallTankOverflowPin = 19;
@@ -18,13 +18,13 @@ const int sumpPumpRelayPin = 42; // G-REL (32+8+3)
 
 // Define pin number for button
 #define NUM_BUTTONS 2
-const int handDropButtonPin = 39; // G-BUT-3 P1 (32+7)
-const int bigDropButtonPin = 37; // G-BUT-3 P3 (32+5)
+const int handDropButtonPin = 36; // G-BUT-3 P1 (32+4) (Called button 1 in the code)
+const int bigDropButtonPin = 38; // G-BUT-3 P3 (32+6)
 const uint8_t BUTTON_PINS[NUM_BUTTONS] = {handDropButtonPin, bigDropButtonPin};
 
 // Define pin numbers for button lights
-const int handDropButtonLightPin = 38; // G-BUT-3 P0 (32+6)
-const int bigDropButtonLightPin = 36; // G-BUT-3 P2 (32+4)
+const int handDropButtonLightPin = 37; // G-BUT-3 P0 (32+5)
+const int bigDropButtonLightPin = 39; // G-BUT-3 P2 (32+7)
 const uint8_t BUTTON_LIGHT_PINS[NUM_BUTTONS] = {handDropButtonLightPin, bigDropButtonLightPin};
 
 // CONFIG ITEMS, NOT PINS

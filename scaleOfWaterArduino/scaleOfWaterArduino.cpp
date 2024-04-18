@@ -45,8 +45,8 @@ void loop()
 	//delay(5000);
 	//dispense();
 	//timeout();
-	//testDrain();
-	testStepperDispense();
+	testDrain();
+	//testStepperDispense();
 }
 
 void setupButtons()
@@ -55,12 +55,14 @@ void setupButtons()
 	for (int i = 0; i < NUM_BUTTONS; i++) {
 		buttons[i].attach(BUTTON_PINS[i], INPUT_PULLUP);       //setup the bounce instance for the current button
 		buttons[i].interval(debounceInterval);              // interval in ms
+		Serial << "Button " << i << " setup" << endl;
 	}
 
 	//Setup LED pins
 	for (int i = 0; i < NUM_BUTTONS; i++) {
 		pinMode(BUTTON_LIGHT_PINS[i], OUTPUT); // set the LED pin to output
 		digitalWrite(BUTTON_LIGHT_PINS[i], HIGH); // initialize the LED in high state
+		Serial << "Button " << i << " light setup" << endl;
 	}
 
 }
@@ -111,15 +113,15 @@ void calibratePump(AccelStepper stepper, bool forward)
 
 void buttonPoll()
 {    
-	for (int i = 0; i < (NUM_BUTTONS-1); i++)  {
+	for (int i = 0; i < NUM_BUTTONS; i++)  {
 		// Update the Bounce instance :
 		buttons[i].update();
 		// If it rose (was pressed), flag the need to toggle the LED
 		if (buttons[i].rose()) { // If the button in the for loop was pressed
 			Serial << "Button " << i << " pressed" << endl;
 			// Toggle the LED
-			digitalWrite(BUTTON_LIGHT_PINS[i], LOW); // Turn on the light for the button that was pressed
-			if (i == state) { // if the button is pressed again, drain the tank
+			digitalWrite(BUTTON_LIGHT_PINS[i], LOW); // Turn off the light for the button that was pressed
+			if ((i == state) && (i == 1)) { // if the button is pressed again, drain the tank
 				drainTank(); // if the button is pressed again, drain the tank
 				return;
 			}
@@ -201,9 +203,9 @@ void drainTank()
 		return; // Do not drain if the large tank is dispensing, returns out of function
 	}
 	Serial << "Draining tank" << endl;
-	digitalWrite(drainRelayPin, HIGH); // Turn on the relay to drain the big tank
+	digitalWrite(drainRelayPin, LOW); // Turn on the relay to drain the big tank. REVERSE LOGIC! (LOW = ON)
 	delay(tankDrainDuration); // Wait for the specified duration, blocking
-	digitalWrite(drainRelayPin, LOW); // Turn off the relay to close the valve
+	digitalWrite(drainRelayPin, HIGH); // Turn off the relay to close the valve. REVERSE LOGIC! (HIGH = OFF)
 	//overflowCheck(LARGE_TANK); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
 	digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
 	largeTankState = IDLE; // Set the large tank state to idle
@@ -280,11 +282,12 @@ void gitPrint() { //prints git information to the serial monitor using the Strea
 #endif
 
 void testDrain() {
-	Serial << "Test Draining tank" << endl;
+	Serial << "Test Draining Tank" << endl;
 	digitalWrite(drainRelayPin, HIGH); // Turn on the relay to drain the big tank
 	delay(5000); // Wait for the specified duration
 	digitalWrite(drainRelayPin, LOW); // Turn off the relay to close the valve
-	Serial << "Tank drained" << endl;
+	delay(5000);
+	Serial << "Test Finished" << endl;
 }
 
 void testSumpPump() {
@@ -292,6 +295,7 @@ void testSumpPump() {
 	digitalWrite(sumpPumpRelayPin, HIGH);
 	delay(5000);
 	digitalWrite(sumpPumpRelayPin, LOW);
+	delay(5000);
 	Serial << "Done Pumping Sump Pump" << endl;
 }
 
