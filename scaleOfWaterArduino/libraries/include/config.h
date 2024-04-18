@@ -51,6 +51,7 @@ const int debounceInterval = 50; // Debounce interval for button
 // Timeout
 const int timeoutMillis = 20000; // Timeout duration in milliseconds, 20 seconds
 // Other timing variables
-const int tankDrainDuration = 4000; // Duration to drain the big tank
+const int tankDrainDuration = 9500; // Duration to drain the big tank
+const int tankFillDuration = 5500; // Duration to fill the big tank
 
 #endif // PINS_H

@@ -30,12 +30,11 @@ void setup()
 	#ifdef PLATFORMIO
 		gitPrint(); //prints git info to the serial monitor
 	#endif
-
-  drainTank(); // Drain both tanks
-	setupButtons(); // Set up the buttons and button lights
-	setupSteppers(); // Set up the stepper motors
 	pinMode(drainRelayPin, OUTPUT); // Set the relay pin to output
 	pinMode(sumpPumpRelayPin, OUTPUT); // Set the relay pin to output
+	drainTank(); // Drain both tanks
+	setupButtons(); // Set up the buttons and button lights
+	setupSteppers(); // Set up the stepper motors
 }
 
 void loop()
@@ -45,7 +44,8 @@ void loop()
 	//delay(5000);
 	//dispense();
 	//timeout();
-	testDrain();
+	//testDrain();
+	testSumpPump();
 	//testStepperDispense();
 }
 
@@ -183,14 +183,13 @@ void dispense()
 	}
 }
 
-void sumpPumpDispense(int mLs)
+void sumpPumpDispense()
 {
-	const unsigned long sumpDelay = (mLs / mLsPerSecondSumpPump * 1000);
 	unsigned long currentMillis = millis();
-	Serial << "Dispensing " << mLs << " mLs sump pump... " << endl;
-	digitalWrite(sumpPumpRelayPin, HIGH);
-	if (currentMillis - previousMillis >= sumpDelay) {
-		digitalWrite(sumpPumpRelayPin, LOW);
+	Serial << "Dispensing... " << endl;
+	digitalWrite(sumpPumpRelayPin, LOW); // reverse logic, LOW turns on the relay
+	if (currentMillis - previousMillis >= tankFillDuration) {
+		digitalWrite(sumpPumpRelayPin, HIGH); // reverse logic, HIGH turns off the relay
 		Serial << "Done Pumping Sump Pump" << endl;
 		previousMillis = currentMillis;
 	}
@@ -203,9 +202,9 @@ void drainTank()
 		return; // Do not drain if the large tank is dispensing, returns out of function
 	}
 	Serial << "Draining tank" << endl;
-	digitalWrite(drainRelayPin, LOW); // Turn on the relay to drain the big tank. REVERSE LOGIC! (LOW = ON)
+	digitalWrite(drainRelayPin, LOW); // Turn on the relay to drain the big tank.
 	delay(tankDrainDuration); // Wait for the specified duration, blocking
-	digitalWrite(drainRelayPin, HIGH); // Turn off the relay to close the valve. REVERSE LOGIC! (HIGH = OFF)
+	digitalWrite(drainRelayPin, HIGH); // Turn off the relay to close the valve.
 	//overflowCheck(LARGE_TANK); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
 	digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
 	largeTankState = IDLE; // Set the large tank state to idle
@@ -291,12 +290,17 @@ void testDrain() {
 }
 
 void testSumpPump() {
-	Serial << "Test Sump Pump" << endl;
-	digitalWrite(sumpPumpRelayPin, HIGH);
-	delay(5000);
+	Serial << "Test Sump Pumping..." << endl;
+	digitalWrite(drainRelayPin, HIGH);
 	digitalWrite(sumpPumpRelayPin, LOW);
-	delay(5000);
+	delay(tankFillDuration);
 	Serial << "Done Pumping Sump Pump" << endl;
+	digitalWrite(sumpPumpRelayPin, HIGH);
+	delay(5000); // Wait to see water level
+	Serial << "Draining Tank" << endl;
+	digitalWrite(drainRelayPin, LOW);
+	delay(tankDrainDuration);
+	Serial << "Done Draining" << endl;
 }
 
 void testStepperDispense() {
