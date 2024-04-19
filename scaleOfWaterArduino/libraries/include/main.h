@@ -6,6 +6,8 @@
 // setup functions
 void setupButtons();
 void setupSteppers();
+void setupTank();
+void pulseSSR(int pin); // Function to pulse the SSR so that it doesn't latch in the on position
 // calibrate functions
 void calibrateSumpPump();
 //void calibratePump(AccelStepper stepper, bool forward);
@@ -27,8 +29,7 @@ void testSumpPump();
 void testStepperDispense();
 
 // Global variables declaration, more config variables in config.h
-long lastButtonPressTime = 0;
-unsigned long previousMillis = 0; // Variable to store the last time the button was pressed
+unsigned long lastButtonPressTime = 0;
 
 // Flags
 bool isTimeout = false; // Flag indicating if timeout has occurred
