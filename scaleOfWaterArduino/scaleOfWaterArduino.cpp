@@ -32,7 +32,8 @@ void setup()
 	#endif
 	pinMode(drainRelayPin, OUTPUT); // Set the relay pin to output
 	pinMode(sumpPumpRelayPin, OUTPUT); // Set the relay pin to output
-	drainTank(); // Drain both tanks
+	digitalWrite(drainRelayPin, HIGH); // Turn off the relay to close the valve
+	drainTank(); // Drain tank
 	setupButtons(); // Set up the buttons and button lights
 	setupSteppers(); // Set up the stepper motors
 	Serial << F("Setup complete, ready for input") << endl;
@@ -43,7 +44,7 @@ void loop()
 	buttonPoll();
 	//drainTank();
 	dispense();
-	//timeout();
+	timeout();
 	//testDrain();
 	//testSumpPump();
 	//testStepperDispense();
@@ -61,7 +62,7 @@ void setupButtons()
 	//Setup LED pins
 	for (int i = 0; i < NUM_BUTTONS; i++) {
 		pinMode(BUTTON_LIGHT_PINS[i], OUTPUT); // set the LED pin to output
-		digitalWrite(BUTTON_LIGHT_PINS[i], HIGH); // initialize the LED in high state
+		digitalWrite(BUTTON_LIGHT_PINS[i], LOW); // initialize the LED in high state
 		Serial << "Button " << i << " light setup" << endl;
 	}
 
@@ -117,14 +118,14 @@ void buttonPoll()
 		// If it rose (was pressed), flag the need to toggle the LED
 		if (buttons[i].rose()) { // If the button in the for loop was pressed
 			Serial << "Button " << i << " pressed" << endl;
-			// Toggle the LED
-			digitalWrite(BUTTON_LIGHT_PINS[i], LOW); // Turn off the light for the button that was pressed
-			if ((i == state) && (i == 1)) { // if the button is pressed again, drain the tank
+			lastButtonPressTime = millis(); // update the last button press time for timeout
+			if (i == state && state == BIG_DROP_STATE) // if the button is pressed again, drain the tank
+			{
 				drainTank(); // if the button is pressed again, drain the tank
 				return;
 			}
+		digitalWrite(BUTTON_LIGHT_PINS[i], HIGH); // Turn off the light for the button that was pressed
 		state = static_cast<State>(i); // set the state to the button that was pressed
-		lastButtonPressTime = millis(); // update the last button press time for timeout
 		}
 	}
 }
@@ -133,19 +134,16 @@ void buttonPoll()
 void stepperDispense()
 {
 	handDropStepper.enable(); // Enable the stepper motor outputs
-	digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], LOW); // Turn off the light for the hand drop button
 	//int steps = round((float)uL / uLsPerRev * stepsPerRev);
 	handDropStepper.move(handDropSteps); // Move the stepper motor forward or backward by the specified number of steps
-	digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn on the light for the hand drop button after dispensing
+	digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], LOW); // Turn on the light for the hand drop button after dispensing
 	handDropStepper.disable(); // Disable the stepper motor outputs
+	state = RESET_STATE; // Set the state to reset
 }
-
-// 	Serial.println(" done");
-// }
 
 void timeout()
 {
-	if (lastButtonPressTime > timeoutMillis)
+	if ((lastButtonPressTime > timeoutMillis) && (largeTankState == DISPENSED))
 	{
 		Serial << "Timeout" << endl;
 		drainTank();
@@ -159,16 +157,16 @@ void dispense()
     case HAND_DROP_STATE:
       Serial << "Hand drop state" << endl;
       stepperDispense();
-      digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn on the light for the hand drop button after dispensing
       break;
 		case BIG_DROP_STATE:
-      digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], LOW); // Turn off the light for the large tank button to show that its full
+			if (largeTankState == DISPENSED) {
+				break;
+			}
       Serial << "Big tank drop state" << endl;
       sumpPumpDispense();
-			delay(5000);
       break;
 		case RESET_STATE:
-			return;
+			break;
     default:
       Serial << "Invalid state" << endl;
       break;
@@ -177,18 +175,18 @@ void dispense()
 
 void sumpPumpDispense()
 {
-	unsigned long currentMillis = millis();
 	Serial << "Dispensing... " << endl;
+	largeTankState = DISPENSING; // Set the large tank state to dispensing
 	digitalWrite(sumpPumpRelayPin, LOW); // reverse logic, LOW turns on the relay
-	if (currentMillis - previousMillis >= tankFillDuration) {
-		digitalWrite(sumpPumpRelayPin, HIGH); // reverse logic, HIGH turns off the relay
-		Serial << "Done Pumping Sump Pump" << endl;
-		previousMillis = currentMillis;
-	}
+	delay(tankFillDuration); // Wait for the specified duration, blocking
+	digitalWrite(sumpPumpRelayPin, HIGH); // reverse logic, HIGH turns off the relay
+	largeTankState = DISPENSED; // Set the large tank state to idle
+	Serial << "Done Pumping Sump Pump" << endl;
 }
 
 void drainTank()
 {
+	largeTankState = DRAINING; // Set the large tank state to draining
 	if (largeTankState == DISPENSING) {
 		Serial << "Large tank is dispensing, cannot drain" << endl;
 		return; // Do not drain if the large tank is dispensing, returns out of function
@@ -198,11 +196,12 @@ void drainTank()
 	delay(tankDrainDuration); // Wait for the specified duration, blocking
 	digitalWrite(drainRelayPin, HIGH); // Turn off the relay to close the valve.
 	//overflowCheck(LARGE_TANK); // Check for overflow after draining the tank. Currently redundant with ISR, but may be useful in the future if we want a full check
-	digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], HIGH); // Turn on the light for the small tank button
 	largeTankState = IDLE; // Set the large tank state to idle
 	state = RESET_STATE;
+	digitalWrite(BUTTON_LIGHT_PINS[BIG_DROP_STATE], LOW); // Turn on the light for the big drop button after draining
 	Serial << "Tank drained" << endl;
 }
+
 /*
 void overflowCheck(int tank) { // Currently redundant with ISR, but may be useful in the future if we want a full check
     bool overflowDetected = false;

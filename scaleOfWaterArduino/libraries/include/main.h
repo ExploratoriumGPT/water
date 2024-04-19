@@ -50,6 +50,7 @@ typedef enum
 typedef enum {
   IDLE,
   DISPENSING,
+  DISPENSED,
   DRAINING,
   OVERFLOW
 } TankState;
