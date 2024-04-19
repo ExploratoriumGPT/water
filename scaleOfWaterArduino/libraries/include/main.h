@@ -14,7 +14,7 @@ void buttonPoll();
 void stepperDispense();
 void timeout();
 void dispense();
-void sumpPumpDispense(int mLs);
+void sumpPumpDispense();
 void drainTank();
 void overflowCheck(int tank); // Currently redundant with ISR, but may be useful in the future if we want a full check
 void resolveOverflow(int tank);

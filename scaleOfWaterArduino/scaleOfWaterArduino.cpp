@@ -35,18 +35,18 @@ void setup()
 	drainTank(); // Drain both tanks
 	setupButtons(); // Set up the buttons and button lights
 	setupSteppers(); // Set up the stepper motors
+	Serial << F("Setup complete, ready for input") << endl;
 }
 
 void loop()
 {
-	//buttonPoll();
+	buttonPoll();
 	//drainTank();
-	//delay(5000);
-	//dispense();
+	dispense();
 	//timeout();
 	//testDrain();
 	//testSumpPump();
-	testStepperDispense();
+	//testStepperDispense();
 }
 
 void setupButtons()
@@ -133,8 +133,10 @@ void buttonPoll()
 void stepperDispense()
 {
 	handDropStepper.enable(); // Enable the stepper motor outputs
+	digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], LOW); // Turn off the light for the hand drop button
 	//int steps = round((float)uL / uLsPerRev * stepsPerRev);
 	handDropStepper.move(handDropSteps); // Move the stepper motor forward or backward by the specified number of steps
+	digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn on the light for the hand drop button after dispensing
 	handDropStepper.disable(); // Disable the stepper motor outputs
 }
 
@@ -152,19 +154,17 @@ void timeout()
 
 void dispense()
 {
-	state = BIG_DROP_STATE; // FOR TESTING
     switch (state)
   {
     case HAND_DROP_STATE:
       Serial << "Hand drop state" << endl;
       stepperDispense();
       digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn on the light for the hand drop button after dispensing
-			//state = RESET_STATE; FOR TESTING
       break;
 		case BIG_DROP_STATE:
       digitalWrite(BUTTON_LIGHT_PINS[LARGE_TANK], LOW); // Turn off the light for the large tank button to show that its full
       Serial << "Big tank drop state" << endl;
-      sumpPumpDispense(bigTankVolume);
+      sumpPumpDispense();
 			delay(5000);
       break;
 		case RESET_STATE:
