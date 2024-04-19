@@ -1,6 +1,6 @@
 // Public libraries
 #include <Arduino.h> // Library for Arduino
-#include <AccelStepper.h> // Library for stepper motor
+#include <DRV8825.h> // Library for stepper motor
 #include <Bounce2.h>     // Library for debouncing button
 #include <Streaming.h> // Library for printing in streaming method
 #ifdef PLATFORMIO
@@ -10,8 +10,8 @@
 #include "libraries/include/main.h" // Header file for scaleOfWaterArduino.ino
 #include "libraries/include/config.h" // Header file for pin definitions and configuration items
 
-// Create instances of AccelStepper and Bounce objects
-AccelStepper handDropStepper(AccelStepper::DRIVER, stpPinHandDropStepper, dirPinHandDropStepper);
+// Create an instance of the DRV8825 class and Bounce class
+DRV8825 handDropStepper(stepsPerRev, dirPinHandDropStepper, stpPinHandDropStepper, enPinHandDropStepper); // Create an instance of the DRV8825 class for the hand drop stepper motor
 Bounce * buttons = new Bounce[NUM_BUTTONS]; // Create an array of button objects
 
 // Initialize enums
@@ -70,11 +70,8 @@ void setupButtons()
 // Function to set up all stepper motors for AccelStepper library
 void setupSteppers()
 {
-	//handDropStepper.setEnablePin(enPinHandDropStepper); // Set enable pin for little stepper motor
-	handDropStepper.setMaxSpeed(maxSpeedHandDropStepper); // Set maximum speed for little stepper motor
-	handDropStepper.setAcceleration(maxAccelHandDropStepper); // Set acceleration for little stepper motor
-	handDropStepper.setSpeed(speedHandDropStepper); // Set speed for little stepper motor
-	//handDropStepper.disableOutputs();
+	handDropStepper.begin(speedHandDropStepper, MICROSTEPS); // Begin the hand drop stepper motor with the specified speed and acceleration
+	handDropStepper.setEnableActiveState(LOW); // Set the enable pin to active low
 }
 
 /* Commenting out for now to worry about calibration later
@@ -133,22 +130,16 @@ void buttonPoll()
 }
 
 // Function to dispense X mL in the specified direction
-void stepperDispense(AccelStepper stepper, long uL, bool forward, long uLsPerRev)
+void stepperDispense()
 {
-	stepper.enableOutputs(); // Enable the stepper motor outputs
-	// Calculate the number of steps required to dispense the specified uL
-	int steps = round((float)uL / uLsPerRev * stepsPerRev);
-	Serial << "Dispensing " << uL << " uL (" << steps << " steps) " << (forward ? "forwards... " : "backwards... ") << endl;
-	stepper.move(forward ? -steps : steps); // Move the stepper motor forward or backward by the specified number of steps
-	// Run the stepper motor until it reaches the target position ////blocking code
-  if (stepper.distanceToGo() != 0) {
-    stepper.run();
-  } else {
-    stepper.disableOutputs(); // Call this once the movement is complete
-  }
-
-	Serial.println(" done");
+	handDropStepper.enable(); // Enable the stepper motor outputs
+	//int steps = round((float)uL / uLsPerRev * stepsPerRev);
+	handDropStepper.move(handDropSteps); // Move the stepper motor forward or backward by the specified number of steps
+	handDropStepper.disable(); // Disable the stepper motor outputs
 }
+
+// 	Serial.println(" done");
+// }
 
 void timeout()
 {
@@ -166,7 +157,7 @@ void dispense()
   {
     case HAND_DROP_STATE:
       Serial << "Hand drop state" << endl;
-      stepperDispense(handDropStepper, handDropVolume, true, uLsPerRevSmallStepper);
+      stepperDispense();
       digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn on the light for the hand drop button after dispensing
 			//state = RESET_STATE; FOR TESTING
       break;
@@ -305,15 +296,11 @@ void testSumpPump() {
 }
 
 void testStepperDispense() {
-	pinMode(enPinHandDropStepper, OUTPUT);
-	digitalWrite(enPinHandDropStepper, HIGH);
-	Serial << "Test Stepper Dispense, 2 rev" << endl;
+	handDropStepper.enable();
+	Serial << "Test Stepper Dispense" << endl;
 	//handDropStepper.enableOutputs(); // Enable the stepper motor outputs
 	// Calculate the number of steps required to dispense the specified uL
-	handDropStepper.move(stepsPerRev*8); // Move the stepper motor forward or backward by the specified number of steps
-	while (handDropStepper.distanceToGo() != 0) {
-			handDropStepper.run(); // Run the stepper motor until it reaches the target position
-	}
-	Serial << "Done Stepper Dispense" << endl;
-	delay(1000);
+	handDropStepper.move(handDropSteps); // Move the stepper motor forward or backward by the specified number of steps
+	handDropStepper.disable(); // Disable the stepper motor outputs
+	delay(3000);
 }

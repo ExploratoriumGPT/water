@@ -1,7 +1,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <AccelStepper.h> // Include the AccelStepper library. Necessary for declarations
 
 // Main functions, in rough order of appearance
 // setup functions
@@ -9,10 +8,10 @@ void setupButtons();
 void setupSteppers();
 // calibrate functions
 void calibrateSumpPump();
-void calibratePump(AccelStepper stepper, bool forward);
+//void calibratePump(AccelStepper stepper, bool forward);
 // main loop functions
 void buttonPoll();
-void stepperDispense(AccelStepper stepper, long steps, bool dir, float uLsPerRev, float maxSpeed);
+void stepperDispense();
 void timeout();
 void dispense();
 void sumpPumpDispense(int mLs);

@@ -1,5 +1,5 @@
-#ifndef PINS_H
-#define PINS_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
 #include <Arduino.h>
 
@@ -31,20 +31,20 @@ const uint8_t BUTTON_LIGHT_PINS[NUM_BUTTONS] = {handDropButtonLightPin, bigDropB
 // Define steps per revolution and mLs per revolution
 const int stepsPerRev = 200;           // with no microstepping (200 steps per rev)
 
-const int handDropVolume = 647; // 0.65 mL
-
-const unsigned int smallTankVolume = 53895; // 53 mL
-const int uLsPerRevSmallStepper = 422; // 3.56mL per 10
+const int handDropVolumeUl = 647; // 0.65 mL
+const int uLsPerRev = 422; // 3.56mL per 10
+const int handDropSteps = round((float)handDropVolumeUl / uLsPerRev * stepsPerRev);
 
 const int bigTankVolume = 500; //2155; // MUST CHANGE! IN ML MUST CHECK. Setting at 500 for testing
-const int uLsPerRevBigStepper = 3190;   /////////////////////////////////////// 3,6mL per rev
 
 const int mLsPerSecondSumpPump = 420; //  How many mLs per second the sump pump dispenses
 
 // Define maximum speed and acceleration for the stepper motors
-const int maxSpeedHandDropStepper = 1000; // 350*1600 per datasheet; NOTE: THIS IS OVER THE MAXIMUM VALUE FOR AN INT
-const int maxAccelHandDropStepper = maxSpeedHandDropStepper*1.5;
-const int speedHandDropStepper = maxSpeedHandDropStepper; // 1000 steps per second
+#define speedHandDropStepper 800 // 1000 steps per second
+#define stepsPerRevHandDropStepper 200 // 200 steps per revolution
+#define MICROSTEPS 1 // Microstepping for the stepper motors
+const int handDropStepperRevs = 360; // Time to dispense the hand drop in milliseconds
+
 
 // Define debounce interval for button
 const int debounceInterval = 50; // Debounce interval for button
