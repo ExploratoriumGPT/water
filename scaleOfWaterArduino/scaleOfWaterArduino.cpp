@@ -207,7 +207,7 @@ void sumpPumpDispense()
 	delay(tankFillDuration); // Wait for the specified duration, blocking
 	digitalWrite(sumpPumpRelayPin, HIGH); // reverse logic, HIGH turns off the relay
 	largeTankState = DISPENSED; // Set the large tank state to idle
-	digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], HIGH); // Turn off the light for the hand drop button after dispensing
+	digitalWrite(BUTTON_LIGHT_PINS[HAND_DROP], LOW); // Turn ON the light for the hand drop button after dispensing
 	Serial << "Done Pumping Sump Pump" << endl;
 }
 
