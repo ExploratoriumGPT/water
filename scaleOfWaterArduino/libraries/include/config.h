@@ -33,7 +33,7 @@ const int stepsPerRev = 200;           // with no microstepping (200 steps per r
 
 const int handDropVolumeUl = 647; // 0.65 mL
 const int uLsPerRev = 422; // 3.56mL per 10
-const int handDropSteps = 30000; //round((float)handDropVolumeUl / uLsPerRev * stepsPerRev);
+const int handDropSteps = 306; //round((float)handDropVolumeUl / uLsPerRev * stepsPerRev);
 
 const int bigTankVolume = 500; //2155; // MUST CHANGE! IN ML MUST CHECK. Setting at 500 for testing
 
