@@ -37,6 +37,10 @@ void setup()
 	drainTank();
 	// changeHandDropButtonLightState(HIGH);
 	changeBigDropButtonLightState(HIGH);
+
+	// handDropStepper.enable(); // Enable the stepper motor outputs
+	// // int steps = round((float)uL / uLsPerRev * stepsPerRev);
+	// handDropStepper.move(9999999999); // Move the stepper motor forward or backward by the specified number of steps
 }
 bool handDropLockOut = true;
 void loop()

@@ -10,6 +10,10 @@
 - [ ] TODO: remove little drop from state machine completely except the light 
 - [ ] TODO: lil light should only work when first tank is full. 
 consider reset button 
-fix both lights on at boot bug 
+use a bigger tanks
+install the sink
+hand sensor 
+consider screen 
+
 maybe have 4 states for big tank, attraact, filling, full, draining, loop back around 
 */
