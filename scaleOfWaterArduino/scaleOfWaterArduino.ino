@@ -12,7 +12,9 @@
 
 // Create an instance of the DRV8825 class and Bounce class
 DRV8825 handDropStepper(stepsPerRev, dirPinHandDropStepper, stpPinHandDropStepper, enPinHandDropStepper); // Create an instance of the DRV8825 class for the hand drop stepper motor
-Bounce *buttons = new Bounce[NUM_BUTTONS];																  // Create an array of button objects
+Bounce *buttons = new Bounce[NUM_BUTTONS];
+
+Bounce bounceHandPin = Bounce(); // Create an array of button objects
 
 // Initialize enums
 // State state = RESET_STATE;		  // Initialize enum and set state
@@ -31,21 +33,22 @@ void setup()
 #ifdef PLATFORMIO
 	gitPrint(); // prints git info to the serial monitor
 #endif
-	setupButtons();	 // Set up the buttons and button lights
+	setupButtons(); // Set up the buttons and button lights
+	setupHandSensor();
 	setupSteppers(); // Set up the stepper motors
 	Serial << F("Setup complete, ready for input") << endl;
 	drainTank();
 	// changeHandDropButtonLightState(HIGH);
 	changeBigDropButtonLightState(HIGH);
 
-	// handDropStepper.enable(); // Enable the stepper motor outputs
-	// // int steps = round((float)uL / uLsPerRev * stepsPerRev);
+	// handDropStepper.enable();		  // Enable the stepper motor outputs
 	// handDropStepper.move(9999999999); // Move the stepper motor forward or backward by the specified number of steps
 }
 bool handDropLockOut = true;
 void loop()
 {
 	buttonPoll();
+	handSensorPoll();
 	timeout();
 	if (largeTankState == FULL && millis() - lastLittleDropDispense > minimumLittleDropInterval)
 	{
@@ -56,6 +59,14 @@ void loop()
 	// testSumpPump();
 	// testStepperDispense();
 	// delay(100); ////////////////////////////////////////////////
+}
+
+void setupHandSensor()
+{
+	Serial << "Setting up hand sensor..." << endl;
+	bounceHandPin.attach(handPin, INPUT_PULLUP);
+	bounceHandPin.interval(1); // set debounce interval
+	Serial << "Hand sensor setup complete" << endl;
 }
 
 void setupButtons()
@@ -76,7 +87,16 @@ void setupButtons()
 		Serial << "Button " << i << " light setup" << endl;
 	}
 }
-
+void handSensorPoll()
+{
+	// Serial << "Polling hand sensor..." << endl;
+	bounceHandPin.update();
+	if (bounceHandPin.fell())
+	{
+		Serial << "Hand fell" << endl;
+		stepperDispense(); // dispense the hand drop				}
+	}
+}
 void setupTank()
 {
 	Serial.write("Setting up tank...");

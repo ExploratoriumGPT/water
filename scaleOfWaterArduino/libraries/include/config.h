@@ -10,7 +10,7 @@ const int enPinHandDropStepper = 13;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const int drainRelayPin = 42;    // G-REL (32+8+3)
-const int sumpPumpRelayPin = 23; // G-BRK (32+7)
+const int sumpPumpRelayPin = 23; // G-BRK (16+7)
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // const int bigTankOverflowPin = 18;
 // const int smallTankOverflowPin = 19;
@@ -24,9 +24,10 @@ const uint8_t BUTTON_PINS[NUM_BUTTONS] = {handDropButtonPin, bigDropButtonPin};
 
 // Define pin numbers for button lights
 const int handDropButtonLightPin = 37; // G-BUT-3 P0 (32+5)
-const int bigDropButtonLightPin = 39;  // G-BUT-3 P2 (32+7)
+const int bigDropButtonLightPin = 39;  // G-BUT-3 P2 (32+p7)
 const uint8_t BUTTON_LIGHT_PINS[NUM_BUTTONS] = {handDropButtonLightPin, bigDropButtonLightPin};
 
+const int handPin = 16; // G-BRK on p2 pin p0 //p0 on p2 (16+p0)
 // CONFIG ITEMS, NOT PINS
 // Define steps per revolution and mLs per revolution
 const int stepsPerRev = 200; // with no microstepping (200 steps per rev)
