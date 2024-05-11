@@ -1,0 +1,224 @@
+<!-- ok, white background, FIra Sans font, generate a website with a button on the bottom center. first page, h1 "How much water?" paragraph "
+    
+    Imagine the Earth were as small as this blow-up globe.
+    " button text"get started", triggers next page
+
+Second page h1 "Try this:" paragraph: 
+
+Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?
+
+" button text "find out", triggers next page and uses webserial on chrome to send "F\n" to the serial device.
+
+third page h1"Try this:" paragraph:"
+
+How much water is accessible to humans in lakes, rivers, and groundwater? Put your hand under the sink. That’s the answer!
+
+"button text "find out"triggers next page and uses webserial on chrome to send "D\n" to the serial device.
+
+Final page h1"What's going on?" paragraph:"Earth looks like it has plenty of water: its surface is 71% ocean. But the oceans are a thin layer compared to the rest of the planet. If Earth were an apple, the oceans would be as thick as its skin.
+
+The majority of Earth’s water isn’t drinkable or accessible. Ocean water is too salty. Most freshwater is held in polar ice caps, or deep underground. Humans rely on the tiny amount remaining to meet all of their needs. "button text "Reset"triggers 1st page and uses webserial on chrome to send "R\n" to the serial device. -->
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            background-color: white;
+            font-family: 'Fira Sans', sans-serif;
+            font-size: 2.5vh;
+            justify-content: left;
+            align-items: left;
+            height: 100vh;
+            margin: 5vw;
+            margin-right: 30vw;
+            line-height: 1.4;
+            /* Adjust this value to change the line spacing */
+            overflow: hidden;
+
+            /* Prevent zoom */
+            touch-action: none;
+            /*prevent any interaction except for touch the button */
+
+
+
+        }
+
+        button {
+            position: absolute;
+            bottom: 1em;
+            left: 1em;
+            font-family: 'Fira Sans', sans-serif;
+            font-size: 4vh;
+            padding: 2vh 4vh;
+            border-radius: 1.5vh;
+            width: 50vw;
+            height: 3em;
+            border: none;
+            background-color: #9aa2a6;
+            color: white;
+            cursor: pointer;
+
+        }
+
+
+        #image {
+            display: block;
+
+            /* max-width: 100%; */
+            /* width: 100%; */
+
+            max-height: 30vh;
+
+            height: auto;
+            bottom: 8em;
+            /* margin: 10vh; */
+        }
+    </style>
+</head>
+
+<body>
+    <h1 id="title">no</h1>
+    <p id="text">no</p>
+    <img id="image" src="" alt="Page image">
+    <button id="button">no</button>
+
+    <script>
+        const title = document.getElementById('title');
+        const text = document.getElementById('text');
+        const button = document.getElementById('button');
+        const clickColor = '#1be40c';
+
+        const pages = [
+            //0   
+            { title: 'How much water?', text: 'Imagine the Earth were as small as this blow-up globe.<br>How much water would there be?', buttonText: 'Get started', command: '0', buttonColor: clickColor, image: 'welcome.svg', clickable: true },
+
+            //1
+            { title: 'Try this:', text: 'Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?', buttonText: 'Drain the Earth', command: 'F\n', buttonColor: clickColor, image: 'welcome.svg', clickable: true },
+
+            // 2
+            { title: 'Try this:', text: 'How much water is accessible to humans in lakes, rivers, and groundwater? Put your hand under the sink. That’s the answer!', buttonText: 'Put your hand under sink', command: 'D\n', buttonColor: '#9aa2a6', image: 'drip.svg', clickable: false },
+            //3
+            { title: 'What\'s going on?', text: 'Earth looks like it has plenty of water: its surface is 71% ocean. But the oceans are a thin layer compared to the rest of the planet. If Earth were an apple, the oceans would be as thick as its skin.<br><br>The majority of Earth’s water isn’t drinkable or accessible. Ocean water is too salty. Most freshwater is held in polar ice caps, or deep underground. Humans rely on the tiny amount remaining to meet all of their needs.', buttonText: 'Reset', command: 'R\n', buttonColor: 'lightgrey', image: 'wgo.svg', clickable: true },
+
+        ];
+
+
+
+        let pageIndex = 0;
+        let port;
+
+
+        button.addEventListener('click', async () => {
+            await incrementPage();
+        });
+
+        async function handleReceivedData(data) {
+            console.log(`Received data: ${data}`); // Add this line
+
+            if (data.includes("X")) {
+                if (button.disabled) {
+                    incrementPage();
+
+                }
+            }
+        }
+        async function incrementPage() {
+            resetTimeout();
+            let page = pages[pageIndex];
+            if (page.command) {
+                sendCharOverSerial(page.command);
+            }
+            pageIndex = (pageIndex + 1) % pages.length;
+            page = pages[pageIndex];
+            title.innerHTML = page.title;
+            text.innerHTML = page.text;
+            button.textContent = page.buttonText;
+            button.style.backgroundColor = page.buttonColor;
+            //disable button is clickable is false
+            button.disabled = !page.clickable;
+            image.src = 'svg/' + page.image;
+        }
+
+        window.addEventListener('load', async () => {
+            title.innerHTML = pages[0].title;
+            text.innerHTML = pages[0].text;
+            button.textContent = pages[0].buttonText;
+            button.style.backgroundColor = pages[0].buttonColor;
+            image.src = 'svg/' + pages[0].image;
+            //wait for 500ms
+            await new Promise(resolve => setTimeout(resolve, 500));
+            // port = await navigator.serial.requestPort();
+            const ports = await navigator.serial.getPorts();
+            port = ports[0];
+            // After opening the port
+            // After opening the port
+            await port.open({ baudRate: 9600 });
+
+            // Start reading from the serial port
+            if (port.readable) {
+                reader = port.readable.getReader();
+                inputStream = new ReadableStream({
+                    start(controller) {
+                        readLoop(controller);
+                    }
+                });
+            }
+            resetTimeout();
+        });
+
+        async function readLoop(controller) {
+            while (true) {
+                // console.log('reading');
+                const { value, done } = await reader.read();
+                if (value) {
+                    // console.log('Received:', new TextDecoder().decode(value));
+                    handleReceivedData(new TextDecoder().decode(value));
+                }
+                if (done) {
+                    reader.releaseLock();
+                    break;
+                }
+            }
+        }
+        let timeoutId;
+
+        function resetTimeout() {
+            // Clear the existing timeout
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+
+            // Set a new timeout
+            timeoutId = setTimeout(() => {
+                console.log('Timeout');
+                pageIndex = 0;
+                sendCharOverSerial('T\n')
+                updatePage();
+
+            }, 5000); // 55 seconds
+        }
+
+        function updatePage() {
+            let page = pages[pageIndex];
+            title.innerHTML = page.title;
+            text.innerHTML = page.text;
+            button.textContent = page.buttonText;
+            button.style.backgroundColor = page.buttonColor;
+            button.disabled = !page.clickable;
+            image.src = 'svg/' + page.image;
+        }
+
+        function sendCharOverSerial(char) {
+            if (port) {
+                const writer = port.writable.getWriter();
+                writer.write(new TextEncoder().encode(char));
+                writer.releaseLock();
+            }
+        }
+    </script>
+</body>
+
+</html>
