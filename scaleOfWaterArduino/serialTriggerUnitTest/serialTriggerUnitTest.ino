@@ -80,10 +80,10 @@ void loop()
 		Serial.println('X');
 		digitalWrite(10, ledState);
 		ledState = !ledState;
-    			display.clearDisplay();
-			display.setCursor(0, 0); // Start at top-left corner
-			display.println(F("Litte Drip Dripped"));
-			display.display();
+		display.clearDisplay();
+		display.setCursor(0, 0); // Start at top-left corner
+		display.println(F("Litte Drip Dripped"));
+		display.display();
 	}
 }
 

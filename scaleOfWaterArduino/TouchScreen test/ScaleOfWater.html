@@ -46,35 +46,47 @@ The majority of Earth’s water isn’t drinkable or accessible. Ocean water is 
 
         }
 
+
         button {
-            position: absolute;
-            bottom: 1em;
-            left: 1em;
             font-family: 'Fira Sans', sans-serif;
             font-size: 4vh;
-            padding: 2vh 4vh;
+            /* padding: 2vh 4vh; */
             border-radius: 1.5vh;
-            width: 50vw;
             height: 3em;
             border: none;
             background-color: #9aa2a6;
             color: white;
             cursor: pointer;
-
+            width: 33vw;
         }
 
+        /* #button {
+            width: 22vw;
+        }
+
+        #resetButton {
+            width: 22vw;
+        } */
 
         #image {
             display: block;
-
-            /* max-width: 100%; */
-            /* width: 100%; */
-
-            max-height: 30vh;
-
+            max-height: 50vh;
             height: auto;
             bottom: 8em;
             /* margin: 10vh; */
+        }
+
+        #button-container {
+            display: flex;
+            justify-content: space-evenly;
+            /* gap: 2vw; */
+            /* Adjust this value to increase or decrease the gap */
+            position: absolute;
+            bottom: 5vh;
+            width: 100%;
+            left: 0;
+            right: 0;
+            /* padding: 0 5vh; */
         }
     </style>
 </head>
@@ -83,7 +95,10 @@ The majority of Earth’s water isn’t drinkable or accessible. Ocean water is 
     <h1 id="title">no</h1>
     <p id="text">no</p>
     <img id="image" src="" alt="Page image">
-    <button id="button">no</button>
+    <div id="button-container">
+        <button id="button">no</button>
+        <button id="resetButton">Reset</button>
+    </div>
 
     <script>
         const title = document.getElementById('title');
@@ -93,15 +108,15 @@ The majority of Earth’s water isn’t drinkable or accessible. Ocean water is 
 
         const pages = [
             //0   
-            { title: 'How much water?', text: 'Imagine the Earth were as small as this blow-up globe.<br>How much water would there be?', buttonText: 'Get started', command: '0', buttonColor: clickColor, image: 'welcome.svg', clickable: true },
+            { name: 'READY', title: 'How much water?', text: 'Imagine the Earth were as small as this blow-up globe.<br>How much water would there be?', buttonText: 'Get started', buttonColor: clickColor, image: 'welcome.svg', clickable: true },
 
             //1
-            { title: 'Try this:', text: 'Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?', buttonText: 'Drain the Earth', command: 'F\n', buttonColor: clickColor, image: 'welcome.svg', clickable: true },
-
+            { name: 'PRE_FILL', title: 'Try this:', text: 'Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?', buttonText: 'Drain the Earth', command: 'F\n', buttonColor: clickColor, image: 'welcome.svg', clickable: true },
+            // { title: 'Filling tank...', text: '', buttonText: 'Please wait', command: 'F\n', buttonColor: '#9aa2a6', image: '', clickable: false },
             // 2
-            { title: 'Try this:', text: 'How much water is accessible to humans in lakes, rivers, and groundwater? Put your hand under the sink. That’s the answer!', buttonText: 'Put your hand under sink', command: 'D\n', buttonColor: '#9aa2a6', image: 'drip.svg', clickable: false },
+            { name: 'PRE_DRIP', title: 'Try this:', text: 'How much water is accessible to humans in lakes, rivers, and groundwater? Put your hand under the sink. That’s the answer!', buttonText: 'Put your hand under sink', buttonColor: '#9aa2a6', image: 'drip.svg', clickable: false },
             //3
-            { title: 'What\'s going on?', text: 'Earth looks like it has plenty of water: its surface is 71% ocean. But the oceans are a thin layer compared to the rest of the planet. If Earth were an apple, the oceans would be as thick as its skin.<br><br>The majority of Earth’s water isn’t drinkable or accessible. Ocean water is too salty. Most freshwater is held in polar ice caps, or deep underground. Humans rely on the tiny amount remaining to meet all of their needs.', buttonText: 'Reset', command: 'R\n', buttonColor: 'lightgrey', image: 'wgo.svg', clickable: true },
+            { name: 'WGO', title: 'What\'s going on?', text: 'Earth looks like it has plenty of water: its surface is 71% ocean. But the oceans are a thin layer compared to the rest of the planet. If Earth were an apple, the oceans would be as thick as its skin.<br><br>The majority of Earth’s water isn’t drinkable or accessible. Ocean water is too salty. Most freshwater is held in polar ice caps, or deep underground. Humans rely on the tiny amount remaining to meet all of their needs.', buttonText: 'Reset', command: 'R\n', buttonColor: 'lightgrey', image: 'wgo.svg', clickable: true },
 
         ];
 
@@ -115,59 +130,73 @@ The majority of Earth’s water isn’t drinkable or accessible. Ocean water is 
             await incrementPage();
         });
 
+        document.getElementById('resetButton').addEventListener('click', function () {
+            sendCharOverSerial('R\n');
+            reset();
+        });
+
         async function handleReceivedData(data) {
-            console.log(`Received data: ${data}`); // Add this line
-
+            // console.log(`Received data: ${data}`); // Add this line
+            if (data.includes("\n")) {
+                console.log(`arduino: ${data}`);
+            }
             if (data.includes("X")) {
-                if (button.disabled) {
+                console.log('got x from ard, incrementing page');
+                if (pages[pageIndex].name == 'PRE_DRIP') {
+                    console.log('ARD reported drip, incrementing page');
                     incrementPage();
-
                 }
+            }
+            if (data.includes("T")) {
+                console.log('got t from ard, resetting');
+                reset()
             }
         }
         async function incrementPage() {
             resetTimeout();
             let page = pages[pageIndex];
+            console.log('incrementing page from' + pageIndex + ' to ' + (pageIndex + 1) + ' out of ' + pages.length);
+            // console.log('page.command:', page.command);
+
             if (page.command) {
                 sendCharOverSerial(page.command);
             }
             pageIndex = (pageIndex + 1) % pages.length;
-            page = pages[pageIndex];
+            updatePage();
+
+        }
+
+
+        function updatePage() {
+            console.log('updating page' + pageIndex);
+            let page = pages[pageIndex];
             title.innerHTML = page.title;
             text.innerHTML = page.text;
             button.textContent = page.buttonText;
             button.style.backgroundColor = page.buttonColor;
-            //disable button is clickable is false
-            button.disabled = !page.clickable;
+            // button.disabled = !page.clickable;
             image.src = 'svg/' + page.image;
+
+            if (pageIndex == pages.length - 1 || pageIndex == 0) {
+                document.getElementById('resetButton').style.visibility = 'hidden';
+            } else {
+                document.getElementById('resetButton').style.visibility = 'visible';
+            }
         }
 
-        window.addEventListener('load', async () => {
-            title.innerHTML = pages[0].title;
-            text.innerHTML = pages[0].text;
-            button.textContent = pages[0].buttonText;
-            button.style.backgroundColor = pages[0].buttonColor;
-            image.src = 'svg/' + pages[0].image;
-            //wait for 500ms
-            await new Promise(resolve => setTimeout(resolve, 500));
-            // port = await navigator.serial.requestPort();
-            const ports = await navigator.serial.getPorts();
-            port = ports[0];
-            // After opening the port
-            // After opening the port
-            await port.open({ baudRate: 9600 });
-
-            // Start reading from the serial port
-            if (port.readable) {
-                reader = port.readable.getReader();
-                inputStream = new ReadableStream({
-                    start(controller) {
-                        readLoop(controller);
-                    }
-                });
+        function sendCharOverSerial(char) {
+            if (port) {
+                console.log('sending ' + char + ' over serial');
+                const writer = port.writable.getWriter();
+                writer.write(new TextEncoder().encode(char));
+                writer.releaseLock();
             }
-            resetTimeout();
-        });
+            else {
+                console.log('FAILED to send  ' + char + ' over serial');
+            }
+
+        }
+
 
         async function readLoop(controller) {
             while (true) {
@@ -193,31 +222,72 @@ The majority of Earth’s water isn’t drinkable or accessible. Ocean water is 
 
             // Set a new timeout
             timeoutId = setTimeout(() => {
-                console.log('Timeout');
-                pageIndex = 0;
-                sendCharOverSerial('T\n')
-                updatePage();
+                console.log('Timeout computer side');
+                reset();
 
-            }, 5000); // 55 seconds
+            }, 55000); // 55 seconds
         }
 
-        function updatePage() {
-            let page = pages[pageIndex];
-            title.innerHTML = page.title;
-            text.innerHTML = page.text;
-            button.textContent = page.buttonText;
-            button.style.backgroundColor = page.buttonColor;
-            button.disabled = !page.clickable;
-            image.src = 'svg/' + page.image;
+        function reset() {
+            pageIndex = 0;
+            sendCharOverSerial('T\n');
+            updatePage();
         }
+        // let port;
+        async function setupSerial() {
 
-        function sendCharOverSerial(char) {
+
+            // Request port on button click
+            button.addEventListener('click', async () => {
+                if (!port) {
+                    port = await navigator.serial.requestPort();
+                }
+            });
+
+            // If port is not assigned, try to get available ports
+            if (!port) {
+                try {
+                    console.log('looking for port 0 ...');
+                    const ports = await navigator.serial.getPorts();
+                    port = ports[0];
+                } catch (error) {
+                    console.log('No permission to access serial ports. Requesting permission...');
+                    // Don't request port here, it will be requested on button click
+                }
+            }
+
             if (port) {
-                const writer = port.writable.getWriter();
-                writer.write(new TextEncoder().encode(char));
-                writer.releaseLock();
+                console.log('opening port...');
+                await port.open({ baudRate: 115200 });
+
+                // Start reading from the serial port
+                if (port.readable) {
+                    console.log('port ' + port + ' opened');
+                    reader = port.readable.getReader();
+                    inputStream = new ReadableStream({
+                        start(controller) {
+                            readLoop(controller);
+                        }
+                    });
+                }
             }
         }
+
+        // setupSerial();
+
+        window.addEventListener('load', async () => {
+            title.innerHTML = pages[0].title;
+            text.innerHTML = pages[0].text;
+            button.textContent = pages[0].buttonText;
+            button.style.backgroundColor = pages[0].buttonColor;
+            image.src = 'svg/' + pages[0].image;
+            console.log('looking for ports...');
+            //wait for 500ms
+
+            setupSerial();
+
+            reset();
+        });
     </script>
 </body>
 

@@ -4,11 +4,10 @@
 - [x] TODO: write drain on boot code
 - [ ] TODO: print to OLED screen instead of or in addition to the Serial
 - [ ] TODO: consider adding water level sensor to prevent flooding if drain issue on main tank
-- [ ] TODO: fix weird sudden draining issue 
-- [ ] TODO: make drain and fill code non-blocking in case folks want drips when it is draining
-- [ ] TODO: light logic is not logical or consistent
-- [ ] TODO: remove little drop from state machine completely except the light 
-- [ ] TODO: lil light should only work when first tank is full. 
+- [X] TODO: fix weird sudden draining issue 
+- [X] TODO: light logic is not logical or consistent
+- [X] TODO: remove little drop from state machine completely except the light 
+- [X] TODO: lil light should only work when first tank is full. 
 consider reset button 
 use a bigger tanks
 install the sink

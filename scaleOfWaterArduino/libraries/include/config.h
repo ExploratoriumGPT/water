@@ -50,10 +50,10 @@ const int handDropStepperRevs = 360;   // Time to dispense the hand drop in mill
 const int debounceInterval = 50; // Debounce interval for button
 
 // Timeout
-const int timeoutMillis = 65000; // Timeout duration in milliseconds, 20 seconds
+const int timeoutMillis = 5000; // Timeout duration in milliseconds, 20 seconds
 // Other timing variables
-const int tankDrainDuration = 9000;         // Duration to drain the big tank
-const int tankFillDuration = 5600;          // 5500=14;  // Duration to fill the big tank
+const int tankDrainDuration = 7800;         // Duration to drain the big tank
+const int tankFillDuration = 3500;          // old tank5600;          // 5500=14;  // Duration to fill the big tank
 const int minimumLittleDropInterval = 8000; // Minimum interval between little drops
 const int delayBetweenDispenses = 1000;     //
 
