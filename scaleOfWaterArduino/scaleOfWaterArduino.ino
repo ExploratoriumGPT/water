@@ -25,10 +25,10 @@ void setup()
 {
 	setupTank(); // Set up the tank. First to try to avoid dumping water on startup
 	Serial.begin(9600);
-	Serial << F("All further serial debug will be at 115,200 baud") << endl;
+	Serial << F("all further serial debug will be at 115,200 baud") << endl;
 	delay(50);
 	Serial.begin(115200);
-	Serial << F("Starting setup") << endl;
+	Serial << F("starting setup") << endl;
 
 #ifdef PLATFORMIO
 	gitPrint(); // prints git info to the serial monitor
@@ -36,7 +36,7 @@ void setup()
 	setupButtons(); // Set up the buttons and button lights
 	setupHandSensor();
 	setupSteppers(); // Set up the stepper motors
-	Serial << F("Setup complete, ready for input") << endl;
+	Serial << F("setup complete, ready for input") << endl;
 	// testStepperDispense();
 
 	drainTank();
@@ -89,7 +89,7 @@ void setupHandSensor()
 	Serial << "setting up hand sensor..." << endl;
 	bounceHandPin.attach(handPin, INPUT_PULLUP);
 	bounceHandPin.interval(1); // set debounce interval
-	Serial << "Hand sensor setup complete" << endl;
+	Serial << "hand sensor setup complete" << endl;
 }
 
 void setupButtons()
@@ -222,7 +222,7 @@ void sumpPumpDispense()
 	changeSumpPumpState(LOW);
 	largeTankState = FULL; // Set the large tank state to idle
 	Serial.println('F');   // Full
-	delay(delayBetweenDispenses);
+	// delay(delayBetweenDispenses);
 	changeHandDropButtonLightState(HIGH);
 	Serial << "done pumping sump pump" << endl;
 }

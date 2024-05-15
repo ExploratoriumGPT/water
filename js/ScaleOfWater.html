@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Scale of Water</title>
+    <!-- import fira sans from googlre fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: white;
+            font-family: 'Fira Sans', sans-serif;
+            font-size: 2.5vh;
+            justify-content: left;
+            align-items: left;
+            height: 100vh;
+            margin: 5vw;
+            margin-right: 30vw;
+            line-height: 1.4;
+            /* Adjust this value to change the line spacing */
+            overflow: hidden;
+            /* Prevent zoom */
+            touch-action: none;
+            /*prevent any interaction except for touch the button */
+            /* prevent selection*/
+            user-select: none;
+        }
+
+        button {
+            font-family: 'Fira Sans', sans-serif;
+            font-size: 4vh;
+            /* padding: 2vh 4vh; */
+            border-radius: 1.5vh;
+            height: 3em;
+            border: none;
+            background-color: #9aa2a6;
+            color: white;
+            cursor: pointer;
+            width: 33vw;
+        }
+
+        /* #button {
+            width: 22vw;
+        }
+
+        #resetButton {
+            width: 22vw;
+        } */
+
+        #image {
+            display: block;
+            max-height: 50vh;
+            height: auto;
+            bottom: 8em;
+            /* margin: 10vh; */
+        }
+
+        #button-container {
+            display: flex;
+            justify-content: space-evenly;
+            /* gap: 2vw; */
+            /* Adjust this value to increase or decrease the gap */
+            position: absolute;
+            bottom: 5vh;
+            width: 100%;
+            left: 0;
+            right: 0;
+            /* padding: 0 5vh; */
+        }
+    </style>
+</head>
+
+<body>
+    <h1 id="title">no</h1>
+    <p id="text">no</p>
+    <img id="image" src="" alt="Page image">
+    <div id="button-container">
+        <button id="button">no</button>
+        <button id="resetButton">Reset</button>
+    </div>
+
+    <script>
+        const title = document.getElementById('title');
+        const text = document.getElementById('text');
+        const button = document.getElementById('button');
+        const clickColor = '#1be40c';
+
+        const pages = [
+            //0   
+            { name: 'READY', title: 'How much water?', text: 'Imagine the Earth were as small as this blow-up globe.<br>How much water would there be?', buttonText: 'Get started', buttonColor: clickColor, image: 'welcome.svg', clickable: true, resetVisible: false },
+
+
+            //1
+            { name: 'PRE_FILL', title: 'Try this:', text: 'Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?', buttonText: 'Drain the Earth', command: 'F\n', buttonColor: clickColor, image: 'welcome.svg', clickable: true, resetVisible: true },
+            // { title: 'Filling tank...', text: '', buttonText: 'Please wait', command: 'F\n', buttonColor: '#9aa2a6', image: '', clickable: false },
+            // 2
+            { name: 'PRE_DRIP', title: 'Try this:', text: 'How much water is accessible to humans in lakes, rivers, and groundwater? Put your hand under the sink. That’s the answer!', buttonText: 'Put your hand under sink', buttonColor: '#9aa2a6', image: 'drip.svg', clickable: false, resetVisible: true, incrementCommand: 'X' },
+            //3
+            { name: 'WGO', title: 'What\'s going on?', text: 'Earth looks like it has plenty of water: its surface is 71% ocean. But the oceans are a thin layer compared to the rest of the planet. If Earth were an apple, the oceans would be as thick as its skin.<br><br>The majority of Earth’s water isn’t drinkable or accessible. Ocean water is too salty. Most freshwater is held in polar ice caps, or deep underground. Humans rely on the tiny amount remaining to meet all of their needs.', buttonText: 'Reset', command: 'R\n', buttonColor: clickColor, image: 'wgo.svg', clickable: true, resetVisible: false },
+
+
+        ];
+        const resetPage = { ...pages[0], name: 'RESET', buttonText: 'Putting Earth\'s water back...', command: '', buttonColor: '#9aa2a6', clickable: false, resetVisible: false, lockout: true, incrementCommand: 'E' };
+        const postDripPage = { ...pages[2], name: 'POST_DRIP', buttonText: 'What\'s going on?', command: '', buttonColor: clickColor, clickable: true, resetVisible: false };
+        const fillingPage = { ...pages[1], name: 'FILLING', buttonText: 'Draining all Earth\'s water...', command: '', buttonColor: '#9aa2a6', clickable: false, resetVisible: false, lockout: true, incrementCommand: 'F' };
+        const fullPage = { ...pages[1], name: 'FULL', buttonText: 'What about fresh water?', buttonColor: clickColor, clickable: true, resetVisible: true };
+
+        //append reset page to pages
+        pages.push(resetPage);
+        //put post drip page after drip page
+        pages.splice(3, 0, postDripPage);
+        //put filling page after pre fill page
+        pages.splice(2, 0, fillingPage);
+        pages.splice(3, 0, fullPage);
+
+
+        let pageIndex = 0;
+        let port;
+
+
+        let tankStates = [
+            { name: 'empty', arduinoCharToEnterState: 'E' },// filliNg command to increment state
+            { name: 'filling', arduinoCharToEnterState: 'N' },
+            { name: 'full', arduinoCharToEnterState: 'F' },//v for vacating
+            { name: 'draining', arduinoCharToEnterState: 'V' }
+        ]
+        let tankState = tankStates.find(state => state.name === 'full');
+
+
+        button.addEventListener('click', async () => {
+            await incrementPage();
+        });
+
+        document.getElementById('resetButton').addEventListener('click', function () {
+            reset();
+        });
+
+        async function handleReceivedData(data) {
+            // console.log(`Received data: ${data}`); // Add this line
+            // if (data.includes("\n")) {
+            //     //passthru anything that came over the monitor even if it's not a command
+            //     console.log(`arduino: ${data}`);
+            // }
+
+            // if (pages[pageIndex].incrementCommand) {
+            //     console.log('incrementCommand');
+            //     if (data.includes(pages[pageIndex].incrementCommand)) {
+            //         console.log('incrementing page');
+            //         incrementPage();
+            //     }
+            //     return;
+            // }
+            //if data includes any of the tankStates commandFromArduinoToIncrement, use them to chaneg tank stat to state +1
+            //make an array of tankStates commandFromArduinoToIncrement
+            //if data includes uppercase letter, it's a command from arduino
+            if (/[A-Z]/.test(data)) {
+
+                let tankStateCommands = tankStates.map(state => state.arduinoCharToEnterState);
+                // console.log('all commands' + tankStateCommands)//all commandsE,N,F,V
+                if (tankStateCommands.some(command => data.includes(command))) {
+                    let newState = tankStates.find(state => data.includes(state.arduinoCharToEnterState));
+                    if (newState) {
+                        tankState = newState;
+                        console.log('Received command: ' + tankState.arduinoCharToEnterState + ', so tank state is now ' + tankState.name);
+                        // if (tankState.name == 'filling' || tankState.name == 'empty' || tankState.name == 'draining') {
+                        if (pages[pageIndex].incrementCommand) {
+                            console.log('incrementCommand');
+                            if (data.includes(pages[pageIndex].incrementCommand)) {
+                                // console.log('incrementing page from' + pages[pageIndex].name + ' to ' + pages[(pageIndex + 1) % pages.length].name);
+                                incrementPage();
+                            }
+                        }
+                        //     incrementPage();
+                        // }
+                    } else {
+                        console.log('Received unknown command: ' + data.trim());
+                    }
+                }
+                if (data.includes('X')) {
+                    console.log('Received command: X, drip dropped');
+                    if (pages[pageIndex].name == 'PRE_DRIP') {
+                        incrementPage();
+                    }
+                }
+
+            }
+        }
+        async function incrementPage() {
+            resetTimeout();
+            let page = pages[pageIndex];
+            let newPageIndex = (pageIndex + 1) % pages.length;
+
+            console.info('INCREMENT PAGE page from' + pages[pageIndex].name + ' to ' + pages[newPageIndex].name);
+            if (page.command) {
+                sendCharOverSerial(page.command);
+            }
+            pageIndex = newPageIndex
+            updatePage();
+
+        }
+
+
+        function updatePage() {
+            console.info('updating page' + pageIndex);
+            let page = pages[pageIndex];
+            title.innerHTML = page.title;
+            text.innerHTML = page.text;
+            button.textContent = page.buttonText;
+            button.style.backgroundColor = page.buttonColor;
+            // button.disabled = !page.clickable;
+            image.src = 'svg/' + page.image;
+            resetButton.disabled = page.lockout;
+            button.disabled = page.lockout;
+            document.getElementById('resetButton').style.visibility = page.resetVisible ? 'visible' : 'hidden';
+
+        }
+
+        function sendCharOverSerial(char) {
+            if (port) {
+                console.info('sending ' + char + ' over serial to arduino');
+                const writer = port.writable.getWriter();
+                writer.write(new TextEncoder().encode(char));
+                writer.releaseLock();
+            }
+            else {
+                console.info('FAILED to send  ' + char + ' over serial');
+            }
+
+        }
+
+
+        async function readLoop(controller) {
+            while (true) {
+                // console.log('reading');
+                const { value, done } = await reader.read();
+                if (value) {
+                    // console.log('Received:', new TextDecoder().decode(value));
+                    handleReceivedData(new TextDecoder().decode(value));
+                }
+                if (done) {
+                    reader.releaseLock();
+                    break;
+                }
+            }
+        }
+        let timeoutId;
+
+        function resetTimeout() {
+            // Clear the existing timeout
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+
+            // Set a new timeout
+            timeoutId = setTimeout(() => {
+                console.log('Timeout computer side');
+                reset();
+
+            }, 15000); // 55 seconds
+        }
+
+        async function reset() {
+            // pageIndex = 0;
+            console.log('reset function called');
+            sendCharOverSerial('R\n');
+
+            if (tankState.name == 'full' || tankState.name == 'filling' || tankState.name == 'draining') {
+                console.log('resetting interactive lockout, tank full');
+                pageIndex = pages.findIndex(page => page.name == 'RESET');
+                await sendCharOverSerial('T\n');
+            }
+            else {
+                console.log('resetting interactive FAST, tank not full');
+                pageIndex = pages.findIndex(page => page.name == 'READY');
+            }
+            updatePage();
+        }
+        // let port;
+        async function setupSerial() {
+            // Request port on button click
+            button.addEventListener('click', async () => {
+                if (!port) {
+                    port = await navigator.serial.requestPort();
+                }
+            });
+            // If port is not assigned, try to get available ports
+            if (!port) {
+                try {
+                    console.log('looking for port 0 ...');
+                    const ports = await navigator.serial.getPorts();
+                    port = ports[0];
+                } catch (error) {
+                    console.log('No permission to access serial ports. ');
+                }
+            }
+            if (port) {
+                console.log('opening port...');
+                await port.open({ baudRate: 115200 });
+                // Start reading from the serial port
+                if (port.readable) {
+                    console.log('port ' + port + ' opened');
+                    reader = port.readable.getReader();
+                    inputStream = new ReadableStream({
+                        start(controller) {
+                            readLoop(controller);
+                        }
+                    });
+                }
+            }
+        }
+
+
+        window.addEventListener('load', async () => {
+            // let resetPageIndex = pages.findIndex(page => page.name == 'RESET');
+            // title.innerHTML = 'BOOT'//pages[resetPageIndex].title;
+            // text.innerHTML = pages[resetPageIndex].text;
+            // button.textContent = pages[resetPageIndex].buttonText;
+            // button.style.backgroundColor = pages[resetPageIndex].buttonColor;
+            // image.src = 'svg/' + pages[resetPageIndex].image;
+            // pageIndex = resetPageIndex;
+            // updatePage();
+            console.log('Page Loaded, looking for ports...');
+            //wait for 5000ms
+            // setTimeout(() => {
+            //     setupSerial();
+            // }, 5000);
+
+            setupSerial();
+
+            reset();
+        });
+    </script>
+</body>
+
+</html>
