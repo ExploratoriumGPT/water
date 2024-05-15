@@ -308,6 +308,7 @@
                 // Start reading from the serial port
                 if (port.readable) {
                     console.log('port ' + port + ' opened');
+                    button.remove();
                     reader = port.readable.getReader();
                     inputStream = new ReadableStream({
                         start(controller) {
@@ -315,10 +316,14 @@
                         }
                     });
                 }
+                else {
+                    console.error('port ' + port + ' not readable');
+                    title.innerHTML = 'No serial port found';
+                }
             }
 
             //getr rid of the button
-            button.remove();
+
         }
 
         window.addEventListener('load', async () => {
