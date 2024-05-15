@@ -200,7 +200,6 @@
 
         }
 
-
         function updatePage() {
             console.info('updating page' + pageIndex);
             let page = pages[pageIndex];
@@ -226,9 +225,7 @@
             else {
                 console.info('FAILED to send  ' + char + ' over serial');
             }
-
         }
-
 
         async function readLoop(controller) {
             while (true) {
@@ -278,7 +275,18 @@
         }
         // let port;
         async function setupSerial() {
-            // Request port on button click
+            // draw a huge clickable button in the middle of the screen to request serial port
+            const button = document.createElement('button');
+            button.textContent = 'Request Serial Port, click 1st option, ok!';
+            button.style.position = 'absolute';
+            button.style.top = '50%';
+            button.style.left = '50%';
+            button.style.transform = 'translate(-50%, -50%)';
+            button.style.fontSize = '2rem';
+            button.style.padding = '1rem';
+            button.style.cursor = 'pointer';
+            document.body.appendChild(button);
+
             button.addEventListener('click', async () => {
                 if (!port) {
                     port = await navigator.serial.requestPort();
@@ -308,28 +316,17 @@
                     });
                 }
             }
+
+            //getr rid of the button
+            button.remove();
         }
 
-
         window.addEventListener('load', async () => {
-            // let resetPageIndex = pages.findIndex(page => page.name == 'RESET');
-            // title.innerHTML = 'BOOT'//pages[resetPageIndex].title;
-            // text.innerHTML = pages[resetPageIndex].text;
-            // button.textContent = pages[resetPageIndex].buttonText;
-            // button.style.backgroundColor = pages[resetPageIndex].buttonColor;
-            // image.src = 'svg/' + pages[resetPageIndex].image;
-            // pageIndex = resetPageIndex;
-            // updatePage();
             console.log('Page Loaded, looking for ports...');
-            //wait for 5000ms
-            // setTimeout(() => {
-            //     setupSerial();
-            // }, 5000);
-
             setupSerial();
-
             reset();
         });
+
     </script>
 </body>
 
