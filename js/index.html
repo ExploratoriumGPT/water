@@ -102,7 +102,7 @@
 
         ];
         const resetPage = { ...pages[0], name: 'RESET', buttonText: 'Putting Earth\'s water back...', command: '', buttonColor: '#9aa2a6', clickable: false, resetVisible: false, lockout: true, incrementCommand: 'E' };
-        const postDripPage = { ...pages[2], name: 'POST_DRIP', buttonText: 'What\'s going on?', command: '', buttonColor: clickColor, clickable: true, resetVisible: false };
+        const postDripPage = { ...pages[2], name: 'POST_DRIP', buttonText: 'What\'s going on?', command: '', buttonColor: clickColor, clickable: true, resetVisible: true };
         const fillingPage = { ...pages[1], name: 'FILLING', buttonText: 'Draining all Earth\'s water...', command: '', buttonColor: '#9aa2a6', clickable: false, resetVisible: false, lockout: true, incrementCommand: 'F' };
         const fullPage = { ...pages[1], name: 'FULL', buttonText: 'What about fresh water?', buttonColor: clickColor, clickable: true, resetVisible: true };
 
@@ -147,9 +147,9 @@
 
         //     }, 500);
         // });
-        // button.addEventListener('click', async () => {
-        //     await incrementPage();
-        // });
+        button.addEventListener('click', async () => {
+            await incrementPage();
+        });
 
         document.getElementById('resetButton').addEventListener('click', function () {
             reset();
