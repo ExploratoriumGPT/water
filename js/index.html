@@ -86,6 +86,15 @@
         const button = document.getElementById('button');
         const clickColor = '#1be40c';
 
+        /* 
+        * Greg Notes:
+        *   Array.push() adds an element to the end of an array
+        *   Array.splice(index, 0, element) adds an element to an array at a specific index
+        * 
+        * 
+        * 
+        */
+
         const pages = [
             //0   
             { name: 'READY', title: 'How much water?', text: 'Imagine the Earth were as small as this blow-up globe.<br>How much water would there be?', buttonText: 'Get started', buttonColor: clickColor, image: 'welcome.svg', clickable: true, resetVisible: false },
@@ -101,7 +110,30 @@
 
 
         ];
+
+        /* 
+            This will take all the properties of the first page above:
+                - name
+                - title
+                - text
+                - buttonText
+                - buttonColor
+                - image
+                - clickable
+                - resetVisible
+            and overwrite the properties: 
+                - name
+                - buttonText
+                - buttonColor
+                - clickable
+                - resetVisible
+            and add the properties:
+                - incrementCommand
+                - command
+                - lockout
+        */
         const resetPage = { ...pages[0], name: 'RESET', buttonText: 'Putting Earth\'s water back...', command: '', buttonColor: '#9aa2a6', clickable: false, resetVisible: false, lockout: true, incrementCommand: 'E' };
+        
         const postDripPage = { ...pages[2], name: 'POST_DRIP', buttonText: 'What\'s going on?', command: '', buttonColor: clickColor, clickable: true, resetVisible: true };
         const fillingPage = { ...pages[1], name: 'FILLING', buttonText: 'Draining all Earth\'s water...', command: '', buttonColor: '#9aa2a6', clickable: false, resetVisible: false, lockout: true, incrementCommand: 'F' };
         const fullPage = { ...pages[1], name: 'FULL', buttonText: 'What about fresh water?', buttonColor: clickColor, clickable: true, resetVisible: true };
