@@ -3,35 +3,27 @@
 
 <head>
     <title>Scale of Water</title>
-    <!-- import fira sans from googlre fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            background-color: white;
+        * {
             font-family: 'Fira Sans', sans-serif;
-            font-size: 2.5vh;
-            justify-content: left;
-            align-items: left;
-            height: 100vh;
-            margin: 5vw;
-            margin-right: 30vw;
-            line-height: 1.4;
-            /* Adjust this value to change the line spacing */
+            background-color: white;
             overflow: hidden;
-            /* Prevent zoom */
             touch-action: none;
-            /*prevent any interaction except for touch the button */
-            /* prevent selection*/
             user-select: none;
+            margin: 0;
+        }
+
+        body {
+            font-size: 3vh;
         }
 
         button {
-            font-family: 'Fira Sans', sans-serif;
+            font-weight: bold;
             font-size: 4vh;
-            /* padding: 2vh 4vh; */
-            border-radius: 1.5vh;
+            border-radius: 2vh;
             height: 3em;
             border: none;
             background-color: #9aa2a6;
@@ -40,44 +32,56 @@
             width: 33vw;
         }
 
-        /* #button {
-            width: 22vw;
+        h1 {
+            font-size: 6vh;
         }
 
-        #resetButton {
-            width: 22vw;
-        } */
-
-        #image {
-            display: block;
-            max-height: 50vh;
-            height: auto;
-            bottom: 8em;
-            /* margin: 10vh; */
+        p {
+            justify-content: left;
+            align-items: left;
+            line-height: 1.4;
+            padding-right: 25vw;
         }
 
-        #button-container {
+        #container {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+            width: 100vw;
+            box-sizing: border-box;
+            padding-bottom: 4vh;
+            padding-top: 4vh;
+            padding-left: 4vh;
+            padding-right: 4vh;
+        }
+
+        #image-div {
             display: flex;
-            justify-content: space-evenly;
-            /* gap: 2vw; */
-            /* Adjust this value to increase or decrease the gap */
-            position: absolute;
-            bottom: 5vh;
-            width: 100%;
-            left: 0;
-            right: 0;
-            /* padding: 0 5vh; */
+            overflow: hidden;
+            padding: 2vh;
+        }
+
+        #buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10vw;
         }
     </style>
 </head>
 
 <body>
-    <h1 id="title">no</h1>
-    <p id="text">no</p>
-    <img id="image" src="" alt="Page image">
-    <div id="button-container">
-        <button id="button">no</button>
-        <button id="resetButton">Reset</button>
+    <div id="container">
+        <div id="text-div">
+            <h1 id="title">How Much Water?</h1>
+            <p id="text">I'm sorry, I am not working today. Please tell staff.</p>
+        </div>
+        <div id="image-div">
+            <img id="image" src="">
+        </div>
+        <div id="buttons">
+            <button id="button">Start</button>
+            <button id="resetButton">Reset</button>
+        </div>
     </div>
 
     <script>
@@ -92,19 +96,19 @@
 
 
             //1
-            { name: 'PRE_FILL', title: 'Try this:', text: 'Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?', buttonText: 'Drain the Earth', command: 'F\n', buttonColor: clickColor, image: 'welcome.svg', clickable: true, resetVisible: true },
+            { name: 'PRE_FILL', title: 'Try this:', text: 'Look at the model of the Earth. Imagine draining all of its water.<br>Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?', buttonText: 'Drain the Earth', command: 'F\n', buttonColor: clickColor, image: 'welcome.svg', clickable: true, resetVisible: true },
             // { title: 'Filling tank...', text: '', buttonText: 'Please wait', command: 'F\n', buttonColor: '#9aa2a6', image: '', clickable: false },
             // 2
-            { name: 'PRE_DRIP', title: 'Try this:', text: 'How much water is accessible to humans in lakes, rivers, and groundwater? Put your hand under the sink. That’s the answer!', buttonText: 'Put your hand under sink', buttonColor: '#9aa2a6', image: 'drip.svg', clickable: false, resetVisible: true, incrementCommand: 'X' },
+            { name: 'PRE_DRIP', title: 'Try this:', text: 'How much water is accessible to humans in lakes, rivers, and groundwater?<br>Put your hand under the sink. That’s the answer!', buttonText: 'Put your hand under sink', buttonColor: '#9aa2a6', image: 'drip.svg', clickable: false, resetVisible: true, incrementCommand: 'X' },
             //3
-            { name: 'WGO', title: 'What\'s going on?', text: 'Earth looks like it has plenty of water: its surface is 71% ocean. But the oceans are a thin layer compared to the rest of the planet. If Earth were an apple, the oceans would be as thick as its skin.<br><br>The majority of Earth’s water isn’t drinkable or accessible. Ocean water is too salty. Most freshwater is held in polar ice caps, or deep underground. Humans rely on the tiny amount remaining to meet all of their needs.', buttonText: 'Reset', command: 'R\n', buttonColor: clickColor, image: 'wgo.svg', clickable: true, resetVisible: false },
+            { name: 'WGO', title: 'What\'s going on?', text: 'Earth looks like it has plenty of water: its surface is 71% ocean. But the oceans are a thin layer compared to the rest of the planet. If Earth were an apple, the oceans would be as thick as its skin.<br><br>The majority of Earth’s water isn’t drinkable or accessible. Ocean water is too salty. Most freshwater is held in polar ice caps, or deep underground.<br>Humans rely on the tiny amount remaining to meet all of their needs.', buttonText: 'Reset', command: 'R\n', buttonColor: clickColor, image: 'wgo.svg', clickable: true, resetVisible: false },
 
 
         ];
         const resetPage = { ...pages[0], name: 'RESET', buttonText: 'Putting Earth\'s water back...', command: '', buttonColor: '#9aa2a6', clickable: false, resetVisible: false, lockout: true, incrementCommand: 'E' };
         const postDripPage = { ...pages[2], name: 'POST_DRIP', buttonText: 'What\'s going on?', command: '', buttonColor: clickColor, clickable: true, resetVisible: true };
         const fillingPage = { ...pages[1], name: 'FILLING', buttonText: 'Draining all Earth\'s water...', command: '', buttonColor: '#9aa2a6', clickable: false, resetVisible: false, lockout: true, incrementCommand: 'F' };
-        const fullPage = { ...pages[1], name: 'FULL', buttonText: 'What about fresh water?', buttonColor: clickColor, clickable: true, resetVisible: true };
+        const fullPage = { ...pages[1], name: 'FULL', buttonText: 'What about fresh water?', buttonColor: clickColor, clickable: true, resetVisible: true, image: 'full.svg' };
 
         //append reset page to pages
         pages.push(resetPage);
@@ -117,7 +121,11 @@
 
         let pageIndex = 0;
         let port;
-
+        let debug = true; //allow ui dev without arduino
+        if (debug) {
+            pages.forEach(page => page.clickable = true);
+            pages.forEach(page => page.lockout = false);
+        }
 
         let tankStates = [
             { name: 'empty', arduinoCharToEnterState: 'E' },// filliNg command to increment state
