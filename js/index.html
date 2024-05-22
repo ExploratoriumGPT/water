@@ -436,12 +436,12 @@
                 async function handleButtonClick() {
                     updateFeedback("Opening serial connection dialog...");
                     const port = await navigator.serial.requestPort();
-
                     if (port) {
                         console.log('port opened');
-                        // It's now safe to remove the button
+                        // Redo the Init function to re-establish the serial connection
+                        init();
+                        // Clean up the button
                         serialButton.remove();
-                        // rerun the serial connection function
                     }
                 }
                 serialButton.addEventListener('click', handleButtonClick);
@@ -531,7 +531,7 @@
                   }
               } */
 
-            window.addEventListener('load', async () => {
+            async function init() {
                 // console.log('Page Loaded, looking for ports...');
                 const { openPort, stream } = await connectSerial();
                 port = openPort;
@@ -541,8 +541,8 @@
                     reset();
                 }
             }
-            );
 
+            window.addEventListener('load', init);
 
         </script>
     </body>
