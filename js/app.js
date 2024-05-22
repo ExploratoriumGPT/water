@@ -6,7 +6,7 @@ if ( !pages ) {
     console.error('---- No externalPages found in window object ----');
 }
 
-let currentStep = 5;
+let currentStep = 0;
 let currentPage;
 let timeoutId;
 let port;
@@ -18,7 +18,9 @@ const sequence = [
     'FILLING',
     'FULL',
     'PRE_DRIP',
-    'POST_DRIP'
+    'POST_DRIP',
+    'WGO',
+    'RESET'
 ];
 
 function begin() {

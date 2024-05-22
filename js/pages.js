@@ -12,7 +12,7 @@ window.externalPages = [
   {
     "name": "PRE_FILL",
     "title": "Try this:",
-    "text": "Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?",
+    "text": "Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice &ndash; even water inside living things like you. How full would the tank be?",
     "buttonText": "Drain the Earth",
     "command": "F\n",
     "buttonColor": "#1be40c",
@@ -23,7 +23,7 @@ window.externalPages = [
   {
     "name": "FILLING",
     "title": "Try this:",
-    "text": "Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?",
+    "text": "Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice &ndash; even water inside living things like you. How full would the tank be?",
     "buttonText": "Draining all Earth's water...",
     "command": "",
     "buttonColor": "#9aa2a6",
@@ -36,7 +36,7 @@ window.externalPages = [
   {
     "name": "FULL",
     "title": "Try this:",
-    "text": "Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?",
+    "text": "Look at the model of the Earth. Imagine draining all of its water. Drain the oceans, lakes, ice &ndash; even water inside living things like you. How full would the tank be?",
     "buttonText": "What about fresh water?",
     "command": "F\n",
     "buttonColor": "#1be40c",
@@ -47,7 +47,7 @@ window.externalPages = [
   {
     "name": "PRE_DRIP",
     "title": "Try this:",
-    "text": "How much water is accessible to humans in lakes, rivers, and groundwater? Put your hand under the sink. That’s the answer!",
+    "text": "How much water is accessible to humans in lakes, rivers, and groundwater? Put your hand under the sink. That&apos;s the answer!",
     "buttonText": "Put your hand under sink",
     "buttonColor": "#9aa2a6",
     "image": "drip.svg",
@@ -58,7 +58,7 @@ window.externalPages = [
   {
     "name": "POST_DRIP",
     "title": "Try this:",
-    "text": "How much water is accessible to humans in lakes, rivers, and groundwater? Put your hand under the sink. That’s the answer!",
+    "text": "How much water is accessible to humans in lakes, rivers, and groundwater? Put your hand under the sink. That&apos;s the answer!",
     "buttonText": "What's going on?",
     "buttonColor": "#1be40c",
     "image": "drip.svg",
@@ -70,7 +70,7 @@ window.externalPages = [
   {
     "name": "WGO",
     "title": "What's going on?",
-    "text": "Earth looks like it has plenty of water: its surface is 71% ocean. But the oceans are a thin layer compared to the rest of the planet. If Earth were an apple, the oceans would be as thick as its skin.<br><br>The majority of Earth’s water isn’t drinkable or accessible. Ocean water is too salty. Most freshwater is held in polar ice caps, or deep underground. Humans rely on the tiny amount remaining to meet all of their needs.",
+    "text": "Earth looks like it has plenty of water: its surface is 71% ocean. But the oceans are a thin layer compared to the rest of the planet. If Earth were an apple, the oceans would be as thick as its skin.<br><br>The majority of Earth&apos;s water isn&apos;t drinkable or accessible. Ocean water is too salty. Most freshwater is held in polar ice caps, or deep underground. Humans rely on the tiny amount remaining to meet all of their needs.",
     "buttonText": "Reset",
     "command": "R\n",
     "buttonColor": "#1be40c",
