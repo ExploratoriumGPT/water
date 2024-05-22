@@ -160,6 +160,10 @@ function handleSerialReaderData(data) {
 }
 
 
+
+
+
+
 // Serial Setup
 
 // Serial setup https://developer.chrome.com/docs/capabilities/serial
@@ -226,17 +230,16 @@ async function connectSerial() {
     return connectedPort;
 }
 
-async function setupSerialReader(port) {
+async function setupSerialReader(port, callback) {
     // Set up a reader to read data from the serial port
-    
     // Adding this function here because it is only used by the reader:
-    async function readLoop(controller) {
+    async function readLoop(controller, reader) {
         while (true) {
             // console.log('reading');
             const { value, done } = await reader.read();
             if (value) {
                 // console.log('Received:', new TextDecoder().decode(value));
-                handleSerialReaderData(new TextDecoder().decode(value));
+                callback(new TextDecoder().decode(value));
             }
             if (done) {
                 reader.releaseLock();
@@ -244,18 +247,16 @@ async function setupSerialReader(port) {
             }
         }
     }
-    
-    reader = await port.readable.getReader();
-    inputStream = new ReadableStream(
+    const reader = await port.readable.getReader();
+    const stream = new ReadableStream(
         {
             start(controller) {
                 // The following function handles each data chunk
-                readLoop(controller);
+                readLoop(controller, reader);
             }
         }
     );
-    
-    return inputStream;
+    return stream;
 }
 
 
