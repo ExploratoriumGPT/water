@@ -288,7 +288,6 @@
             // pageIndex = 0;
             console.log('reset function called');
             sendCharOverSerial('R\n');
-
             if (tankState.name == 'full' || tankState.name == 'filling' || tankState.name == 'draining') {
                 console.log('resetting interactive lockout, tank full');
                 pageIndex = pages.findIndex(page => page.name == 'RESET');
@@ -300,86 +299,250 @@
             }
             updatePage();
         }
-        // let port;
-
-        async function setupSerial() {
-            if ('serial' in navigator) {
 
 
-                const serialButton = document.createElement('button');
-                serialButton.textContent = 'Request Serial Port, click 1st option, ok!';
-                serialButton.style.position = 'absolute';
-                serialButton.style.top = '50%';
-                serialButton.style.left = '50%';
-                serialButton.style.transform = 'translate(-50%, -50%)';
-                serialButton.style.fontSize = '2rem';
-                serialButton.style.padding = '1rem';
-                serialButton.style.cursor = 'pointer';
-                console.log('setupSerialsetupSerialsetupSerialsetupSerial');
-                // if (!port) {
-                title.innerHTML = 'No serial yet, please allow';
-                //     console.log('No serial yet, please allow');
-                //     await new Promise(resolve => setTimeout(resolve, 3000));
-                try {
-                    const ports = await navigator.serial.getPorts();
-                    if (ports.length > 0) {
-                        port = ports[0];
-                        await port.open({ baudRate: 115200 });
-                        console.log('port ' + port + ' opened');
-                        reader = port.readable.getReader();
-                        inputStream = new ReadableStream({
-                            start(controller) {
-                                readLoop(controller);
-                            }
-                        });
-                        const signals = await port.getSignals();
-                        console.log(signals);
-                        return true;
-                    }
-                } catch (err) {
-                    console.log('No pre-authorized ports found, requesting user selection');
-                }
-                document.body.appendChild(serialButton);
-                return new Promise((resolve, reject) => {
-                    serialButton.addEventListener('click', async function () {
-                        try {
-                            port = await navigator.serial.requestPort();
-                            await port.open({ baudRate: 115200 }); // `baudRate` was `baudrate` in previous versions.
-                            console.log('port ' + port + ' opened');
-                            reader = port.readable.getReader();
-                            inputStream = new ReadableStream({
-                                start(controller) {
-                                    readLoop(controller);
-                                }
-                            });
-                            const signals = await port.getSignals();
-                            console.log(signals);
-                            serialButton.remove();
-                            resolve(true);
-                        } catch (err) {
-                            console.error('There was an error opening the serial port:', err);
-                            reject(false);
-                        }
-                    });
-                });
-            } else {
-                console.error('Web serial doesn\'t seem to be enabled in your browser. Check https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility for more info.')
 
+        /* ------------------------------------  
+        * 
+        *  Functions for Serial Connection
+        *  
+        * ------------------------------------ */
+
+        async function connectSerial() {
+            if (!navigator.serial) {
+                updateFeedback('Serial not supported in this browser');
+                return;
+            }
+            let connectedPort = null;
+            let readerStream = null;
+            try {
+                addSerialListeners();
+                updateFeedback("Aquiring serial port...");
+                connectedPort = await openSerialPort();
+                readerStream = await applyReaderToPort(connectedPort, handleReceivedData);
+                // checkSignals(connectedPort);
+                return { openPort: connectedPort, stream: readerStream };
+            } catch (err) {
+                console.error('Could not connect to serial port: ', err);
+                // no serial ports avaialble, follow these steps:
+                //      Serial setup https://developer.chrome.com/docs/capabilities/serial
+                //        Open Chrome
+                //          - At the top right, click the 3 dots and then Settings.
+                //          - Click Privacy and security and then Site Settings and then Additional permissions.
+                //          - Choose your device type:
+                //               - USB devices
+                //               - Serial ports
+                //               - HID devices
+                //          To choose a default setting, select an option.
+                displaySerialFixButton();
             }
         }
 
-        window.addEventListener('load', async () => {
-            // console.log('Page Loaded, looking for ports...');
-            const setupResult = await setupSerial();
-            console.log('Page Loaded, setupSerial done');
-            if (setupResult) {
-                console.log('setupResult happened!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        async function openSerialPort() {
+            // Wait for existing serial ports to be populated
+            const ports = await navigator.serial.getPorts();
+            let connectedPort = null;
+            if (ports.length <= 0) {
+                throw "No serial ports found";
 
+            } else {
+                updateFeedback("Serial ports are avaiable... choosing the first one to open.");
+                connectedPort = ports[0];
+                await connectedPort.open({ baudRate: 115200 });
+                updateFeedback("Serial port opened successfully.");
+
+            }
+            return connectedPort
+        }
+
+        async function applyReaderToPort(openPort, callback) {
+            updateFeedback("Applying Serial Reader to Port...");
+            async function setupSerialReader(oPort, callback) {
+                // Set up a reader to read data from the serial port
+                // Adding this function here because it is only used by the reader:
+                async function readLoop(controller, reader) {
+                    while (true) {
+                        // console.log('reading');
+                        const { value, done } = await reader.read();
+                        if (value) {
+                            callback(new TextDecoder().decode(value));
+                        }
+                        if (done) {
+                            reader.releaseLock();
+                            break;
+                        }
+                    }
+                }
+                const reader = await oPort.readable.getReader();
+                const stream = new ReadableStream(
+                    {
+                        start(controller) {
+                            // The following function handles each data chunk
+                            readLoop(controller, reader);
+                        }
+                    }
+                );
+                return stream;
+            }
+
+            if (openPort) {
+                const readerStream = await setupSerialReader(openPort, callback)
+                updateFeedback("READY!");
+                return readerStream;
+            } else {
+                throw "Missing an open port.";
+            }
+        }
+        async function checkSignals(oPort) {
+            try {
+                const signals = await oPort.getSignals();
+                console.log('Testing Signals:', signals);
+            } catch (err) {
+                console.log('Could not get signals from Serial Port');
+            }
+
+        }
+        function addSerialListeners() {
+            navigator.serial.addEventListener("connect", (e) => {
+                console.log('Serial port connected');
+                // Connect to `e.target` or add it to a list of available ports.
+            });
+            navigator.serial.addEventListener("disconnect", (e) => {
+                console.log('Serial port disconnected');
+                // Remove `e.target` from the list of available ports.
+            });
+        }
+
+
+        /* ------------------------------------  
+        * 
+        *  Handle console logs for serial feedback
+        *  
+        * ------------------------------------ */
+
+        function updateFeedback(message) {
+            console.log(`Serial Feedback: ${message}`);
+        }
+
+
+        /* ------------------------------------
+        * 
+        *  Display a button to allow the user to connect to a serial port
+        *  
+        * ------------------------------------ */
+
+        function displaySerialFixButton() {
+            const serialButton = createSerialButton();
+            async function handleButtonClick() {
+                updateFeedback("Opening serial connection dialog...");
+                const port = await navigator.serial.requestPort();
+                if (port) {
+                    console.log('port opened');
+                    // Redo the Init function to re-establish the serial connection
+                    init();
+                    // Clean up the button
+                    serialButton.remove();
+                }
+            }
+            serialButton.addEventListener('click', handleButtonClick);
+        }
+        function createSerialButton() {
+            console.log('---- Creating serial button ----');
+            if (document.getElementById('serialButton')) {
+                return;
+            }
+            const serialButton = document.createElement('button');
+            serialButton.textContent = 'Press to connect first available serial port';
+            serialButton.id = 'serialButton';
+            serialButton.style.display = 'inline-block';
+            serialButton.style.position = 'absolute';
+            serialButton.style.top = '50%';
+            serialButton.style.left = '50%';
+            serialButton.style.backgroundColor = '#FF0000';
+            serialButton.style.transform = 'translate(-50%, -50%)';
+            serialButton.style.fontSize = '1.15rem';
+            serialButton.style.padding = '1rem 1rem 2rem 1rem';
+            serialButton.style.cursor = 'pointer';
+            return document.body.appendChild(serialButton);
+        }
+
+
+        /*   async function setupSerial() {
+              if ('serial' in navigator) {
+                  const serialButton = document.createElement('button');
+                  serialButton.textContent = 'Request Serial Port, click 1st option, ok!';
+                  serialButton.style.position = 'absolute';
+                  serialButton.style.top = '50%';
+                  serialButton.style.left = '50%';
+                  serialButton.style.transform = 'translate(-50%, -50%)';
+                  serialButton.style.fontSize = '2rem';
+                  serialButton.style.padding = '1rem';
+                  serialButton.style.cursor = 'pointer';
+                  console.log('setupSerialsetupSerialsetupSerialsetupSerial');
+                  // if (!port) {
+                  title.innerHTML = 'No serial yet, please allow';
+                  //     console.log('No serial yet, please allow');
+                  //     await new Promise(resolve => setTimeout(resolve, 3000));
+                  try {
+                      const ports = await navigator.serial.getPorts();
+                      if (ports.length > 0) {
+                          port = ports[0];
+                          await port.open({ baudRate: 115200 });
+                          console.log('port ' + port + ' opened');
+                          reader = port.readable.getReader();
+                          inputStream = new ReadableStream({
+                              start(controller) {
+                                  readLoop(controller);
+                              }
+                          });
+                          const signals = await port.getSignals();
+                          console.log(signals);
+                          return true;
+                      }
+                  } catch (err) {
+                      console.log('No pre-authorized ports found, requesting user selection');
+                  }
+                  document.body.appendChild(serialButton);
+                  return new Promise((resolve, reject) => {
+                      serialButton.addEventListener('click', async function () {
+                          try {
+                              port = await navigator.serial.requestPort();
+                              await port.open({ baudRate: 115200 }); // `baudRate` was `baudrate` in previous versions.
+                              console.log('port ' + port + ' opened');
+                              reader = port.readable.getReader();
+                              inputStream = new ReadableStream({
+                                  start(controller) {
+                                      readLoop(controller);
+                                  }
+                              });
+                              const signals = await port.getSignals();
+                              console.log(signals);
+                              serialButton.remove();
+                              resolve(true);
+                          } catch (err) {
+                              console.error('There was an error opening the serial port:', err);
+                              reject(false);
+                          }
+                      });
+                  });
+              } else {
+                  console.error('Web serial doesn\'t seem to be enabled in your browser. Check https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility for more info.')
+ 
+              }
+          } */
+
+        async function init() {
+            // console.log('Page Loaded, looking for ports...');
+            const { openPort, stream } = await connectSerial();
+            port = openPort;
+            console.log('Page Loaded, setupSerial done');
+            if (port) {
+                console.log('setupResult happened!!!!!!!!!!!!!!!!!!!!!!!!!!!');
                 reset();
             }
         }
-        );
 
+        window.addEventListener('load', init);
 
     </script>
 </body>
