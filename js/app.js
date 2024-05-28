@@ -1,3 +1,18 @@
+/* **
+*
+* Why is this JavaScript file separate from the HTML file?
+* - This file is separate from the HTML file to keep the code organized and modular.
+* 
+* Why is this file a 'Module'?
+* - With modules we can use ES6 module syntax to import and export functions and variables.
+*
+* What if I don't want to use modules?
+* - If you don't want to use modules, you can remove 
+*   the 'type="module"' attribute from the script tag in the HTML file.
+*/
+
+import { connectSerial } from './serial.js';
+
 
 console.log('---- JavaScript initializing ----');
 
@@ -159,171 +174,6 @@ function handleSerialReaderData(data) {
     }
 }
 
-
-
-
-
-
-// Serial Setup
-
-// Serial setup https://developer.chrome.com/docs/capabilities/serial
-// Open Chrome
-// - At the top right, click the 3 dots and then Settings.
-// - Click Privacy and security and then Site Settings and then Additional permissions.
-// - Choose your device type:
-//      - USB devices
-//      - Serial ports
-//      - HID devices
-// To choose a default setting, select an option.
-
-async function connectSerial() {
-    if (!navigator.serial) {
-        updateFeedback('Serial not supported in this browser');
-        return;
-    }  
-    
-    let connectedPort = null;
-    addSerialListeners();
-    updateFeedback("Aquiring serial port...");
-    // Step 1
-    try {
-        // Wait for existing serial ports to be populated
-        const ports = await navigator.serial.getPorts();
-        if (ports.length > 0) {
-            updateFeedback("Serial ports are avaiable... choosing the first one and opening it.");
-            // Choose the first available port and open it
-            connectedPort = ports[0];
-            await connectedPort.open({ baudRate: 115200 });
-            // console.log('port ' + connectedPort + ' opened');
-            updateFeedback("Serial port opened successfully.");
-            
-        } else {
-            updateFeedback("Aquiring serial port... No ports found!");
-            document.getElementById('serial-help-text').style.display = 'block';
-            const serialButton = createSerialButton();
-            if (serialButton) activateSerialButton(serialButton);
-            
-        }
-    } catch (err) {
-        console.log('No pre-authorized ports found, requesting user selection');
-    }
-    // Step 2
-    try {
-        updateFeedback("Configuring Serial Reader...");
-        if (connectedPort) {
-            const inputStream = await setupSerialReader( connectedPort )
-        } else {
-            updateFeedback("Error: Serial port not connected!");
-        }
-        updateFeedback("READY!");
-    } catch (err) {
-        updateFeedback("Error: Could not configure Serial Reader"); 
-    }  
-    // Step 3
-    try {
-        const signals = await connectedPort.getSignals();
-        console.log('Testing Signals:', signals);
-    } catch (err) {
-        console.log('Could not get signals from Serial Port');
-    }
-    
-    return connectedPort;
-}
-
-async function setupSerialReader(port, callback) {
-    // Set up a reader to read data from the serial port
-    // Adding this function here because it is only used by the reader:
-    async function readLoop(controller, reader) {
-        while (true) {
-            // console.log('reading');
-            const { value, done } = await reader.read();
-            if (value) {
-                // console.log('Received:', new TextDecoder().decode(value));
-                callback(new TextDecoder().decode(value));
-            }
-            if (done) {
-                reader.releaseLock();
-                break;
-            }
-        }
-    }
-    const reader = await port.readable.getReader();
-    const stream = new ReadableStream(
-        {
-            start(controller) {
-                // The following function handles each data chunk
-                readLoop(controller, reader);
-            }
-        }
-    );
-    return stream;
-}
-
-
-function sendCharOverSerial(char) {
-    if (port) {
-        updateStatus( `Sending ${char} to arduino`);
-        const writer = port.writable.getWriter();
-        writer.write(new TextEncoder().encode(char));
-        writer.releaseLock();
-    }
-    else {
-        updateStatus( `No Serial Port, Failed to send ${char} to arduino`);
-    }
-}
-
-function addSerialListeners() {
-    navigator.serial.addEventListener("connect", (e) => {
-        console.log('Serial port connected');
-        // Connect to `e.target` or add it to a list of available ports.
-    });
-    navigator.serial.addEventListener("disconnect", (e) => {
-        console.log('Serial port disconnected');
-        // Remove `e.target` from the list of available ports.
-    });
-}
-
-
-// UI setup
-
-function createSerialButton() {
-    console.log('---- Creating serial button ----');
-    if (document.getElementById('serialButton')) {
-        return;
-    }
-    
-    // Create serial button
-    const serialButton = document.createElement('button');
-    serialButton.textContent = 'Press to connect first available serial port';
-    serialButton.id = 'serialButton';
-    serialButton.style.display = 'inline-block';
-    serialButton.style.position = 'absolute';
-    serialButton.style.top = '50%';
-    serialButton.style.left = '50%';
-    serialButton.style.backgroundColor = '#FF0000';
-    serialButton.style.transform = 'translate(-50%, -50%)';
-    serialButton.style.fontSize = '1.15rem';
-    serialButton.style.padding = '1rem 1rem 2rem 1rem';
-    serialButton.style.cursor = 'pointer';
-    
-    // Attach and Display serial button
-    return document.body.appendChild(serialButton);
-}
-
-function activateSerialButton(serialButton) {
-    async function handleButtonClick() {
-        updateFeedback("Opening serial connection dialog...");
-        const port = await navigator.serial.requestPort();
-        
-        if (port) {
-            console.log('port opened');
-            // It's now safe to remove the button
-            serialButton.remove();
-        }
-    }
-    
-    serialButton.addEventListener('click', handleButtonClick);
-}
 
 
 function updateTitle(text) {
