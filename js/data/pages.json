@@ -1,0 +1,84 @@
+[
+   {
+      "stage":"RESET",
+      "actionText":"Putting Earth's water back...",
+      "graphicsPath":"svg/RESETTING.svg",
+      "resetVisible":false,
+      "lockout":true,
+      "commandToSend":"",
+      "nextCommand":"E"
+   },
+   {
+     "stage":"READY",
+     "actionText":"Get started",
+     "graphicsPath":"svg/PREFILL.svg",
+     "lockout":false,
+     "resetVisible":false,
+     "commandToSend":"",
+     "nextCommand":""
+  },
+  {
+     "stage":"PRE_FILL",
+     "actionText":"Drain the Earth",
+     "graphicsPath":"svg/PREFILL.svg",
+     "lockout":false,
+     "resetVisible":true,
+     "commandToSend":"",
+     "nextCommand":""
+  },
+  {
+     "stage":"FILLING",
+     "actionText":"Draining all Earth's water...",
+     "graphicsPath":"svg/FILLING.svg",
+     "resetVisible":false,
+     "lockout":true,
+     
+     "commandToSend":"F\n",
+     "nextCommand":"F"
+  },
+  {
+     "stage":"FULL",
+     "actionText":"What about fresh water?",
+     "graphicsPath":"svg/POSTFILL.svg",
+     "lockout":false,
+     "resetVisible":true,
+     "commandToSend":"F\n",
+     "nextCommand":""
+  },
+  {
+     "stage":"PRE_DRIP",
+     "actionText":"Put your hand under sink",
+     "graphicsPath":"svg/PREDRIP.svg",
+     "lockout":true,
+     "resetVisible":true,
+     "commandToSend":"",
+     "nextCommand":"X"
+  },
+  {
+     "stage":"POST_DRIP",
+     "actionText":"What's going on?",
+     "graphicsPath":"svg/POSTDRIP.svg",
+     "lockout":false,
+     "resetVisible":true,
+     "commandToSend":"",
+     "nextCommand":"X"
+  },
+  {
+     "name":"WGO",
+     "actionText":"Reset",
+     "graphicsPath":"svg/WGO.svg",
+     "lockout":false,
+     "resetVisible":false,
+     "commandToSend":"",
+     "nextCommand":""
+  },
+  {
+     "stage":"RESET",
+     "actionText":"Putting Earth's water back...",
+     "graphicsPath":"svg/RESETTING.svg",
+     "resetVisible":false,
+     "lockout":true,
+     "commandToSend":"R\n",
+     "nextCommand":"E"
+  }
+]

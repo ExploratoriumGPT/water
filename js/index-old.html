@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Scale of Water</title>
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300&display=swap" rel="stylesheet">
+
+        <style>
+            * {
+                font-family: 'Fira Sans', sans-serif;
+                background-color: white;
+                overflow: hidden;
+                touch-action: none;
+                user-select: none;
+                margin: 0;
+            }
+
+            body {
+                font-size: 3vh;
+            }
+
+            button {
+                font-weight: lighter;
+                /*457 w 40 round 189 tall*/
+                font-size: calc(113/189 * 3em);
+                border-radius: calc((40/189) * 3em);
+                height: 3em;
+                border: none;
+                background-color: var(--green1);
+                color: white;
+                cursor: pointer;
+                width: 33vw;
+            }
+
+            #resetButton {
+                background-color: var(--green5);
+                color: var(--green3);
+                cursor: pointer;
+            }
+
+            #resetButton:active:enabled {
+                background-color: var(--green3);
+                color: var(--green4);
+            }
+
+            button:disabled {
+                background-color: var(--green4);
+                color: white;
+            }
+
+            button:active:enabled {
+                background-color: var(--green3);
+                color: var(--green4);
+            }
+
+            button:active:disabled {
+                background-color: var(--green4);
+                color: white;
+            }
+
+            :root {
+                --green1: #2CAA61;
+                --green2: #1B894B;
+                --green3: #06592D;
+                --green4: #D8EFDD;
+                --green5: #9AD3AE;
+            }
+
+
+            h1 {
+                font-size: 6vh;
+            }
+
+            p {
+                justify-content: left;
+                align-items: left;
+                line-height: 1.4;
+                padding-right: 25vw;
+            }
+
+            #container {
+                display: grid;
+                grid-template-rows: auto 1fr auto;
+                height: 100vh;
+                width: 100vw;
+                box-sizing: border-box;
+                padding-bottom: 4vh;
+                padding-top: 4vh;
+                padding-left: 4vh;
+                padding-right: 4vh;
+            }
+
+            #image-div {
+                display: flex;
+                overflow: hidden;
+                padding: 2vh;
+            }
+
+            #buttons {
+                display: flex;
+                justify-content: space-between;
+                gap: 10vw;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="container">
+            <div id="text-div">
+                <h1 id="title">How Much Water?</h1>
+                <p id="text">I'm sorry, I am not working today. Please tell staff.</p>
+            </div>
+            <div id="image-div">
+                <img id="image" src="">
+            </div>
+            <div id="buttons">
+                <button id="button">Start</button>
+                <button id="resetButton">Reset</button>
+            </div>
+        </div>
+
+        <script>
+            const title = document.getElementById('title');
+            const text = document.getElementById('text');
+            const button = document.getElementById('button');
+            const clickColor = '#1be40c';
+
+            // '#1be40c'
+            // '#9aa2a6'
+
+            const pages = [
+                //0   
+                { name: 'READY', title: 'How much water?', text: 'Imagine the Earth were as small as this blow-up globe.<br>How much water would there be?', buttonText: 'Get started', buttonColor: clickColor, image: 'welcome.svg', clickable: true, resetVisible: false },
+
+
+                //1
+                { name: 'PRE_FILL', title: 'Try this:', text: 'Look at the model of the Earth. Imagine draining all of its water.<br>Drain the oceans, lakes, ice – even water inside living things like you. How full would the tank be?', buttonText: 'Drain the Earth', command: 'F\n', buttonColor: clickColor, image: 'welcome.svg', clickable: true, resetVisible: true },
+                // { title: 'Filling tank...', text: '', buttonText: 'Please wait', command: 'F\n', buttonColor: '#9aa2a6', image: '', clickable: false },
+                // 2
+                { name: 'PRE_DRIP', title: 'Try this:', text: 'How much water is accessible to humans in lakes, rivers, and groundwater?<br>Put your hand under the sink. That’s the answer!', buttonText: 'Put your hand under sink', buttonColor: '#9aa2a6', image: 'drip.svg', clickable: false, resetVisible: true, incrementCommand: 'X' },
+                //3
+                { name: 'WGO', title: 'What\'s going on?', text: 'Earth looks like it has plenty of water: its surface is 71% ocean. But the oceans are a thin layer compared to the rest of the planet. If Earth were an apple, the oceans would be as thick as its skin.<br><br>The majority of Earth’s water isn’t drinkable or accessible. Ocean water is too salty. Most freshwater is held in polar ice caps, or deep underground.<br>Humans rely on the tiny amount remaining to meet all of their needs.', buttonText: 'Reset', command: 'R\n', buttonColor: clickColor, image: 'wgo.svg', clickable: true, resetVisible: false },
+
+
+            ];
+            const resetPage = { ...pages[0], name: 'RESET', buttonText: 'Putting Earth\'s water back...', command: '', buttonColor: '#9aa2a6', clickable: false, resetVisible: false, lockout: true, incrementCommand: 'E' };
+            const postDripPage = { ...pages[2], name: 'POST_DRIP', buttonText: 'What\'s going on?', command: '', buttonColor: clickColor, clickable: true, resetVisible: true };
+            const fillingPage = { ...pages[1], name: 'FILLING', buttonText: 'Draining all Earth\'s water...', command: '', buttonColor: '#9aa2a6', clickable: false, resetVisible: false, lockout: true, incrementCommand: 'F' };
+            const fullPage = { ...pages[1], name: 'FULL', buttonText: 'What about fresh water?', buttonColor: clickColor, clickable: true, resetVisible: true, image: 'full.svg' };
+
+            //append reset page to pages
+            pages.push(resetPage);
+            //put post drip page after drip page
+            pages.splice(3, 0, postDripPage);
+            //put filling page after pre fill page
+            pages.splice(2, 0, fillingPage);
+            pages.splice(3, 0, fullPage);
+
+            console.log(JSON.stringify(pages));
+
+
+            let pageIndex = 0;
+            let port;
+            let debug = false; //allow ui dev without arduino
+            if (debug) {
+                pages.forEach(page => page.clickable = true);
+                pages.forEach(page => page.lockout = false);
+            }
+
+            let tankStates = [
+                { name: 'empty', arduinoCharToEnterState: 'E' },// filliNg command to increment state
+                { name: 'filling', arduinoCharToEnterState: 'N' },
+                { name: 'full', arduinoCharToEnterState: 'F' },//v for vacating
+                { name: 'draining', arduinoCharToEnterState: 'V' }
+            ]
+            let tankState = tankStates.find(state => state.name === 'full');
+
+            let debounceTimeout;
+            // const button = document.getElementById('button');
+
+            // // Add event listener to the button
+            // button.addEventListener('click', async function () {
+            //     // Disable the button
+            //     button.disabled = true;
+            //     button.style.backgroundColor = 'black';
+
+
+            //     // Call the incrementPage function
+            //     await incrementPage();
+
+            //     // Re-enable the button after 500ms
+            //     setTimeout(function () {
+            //         button.disabled = false;
+            //         button.style.backgroundColor = 'blue';
+
+            //     }, 500);
+            // });
+            button.addEventListener('click', async () => {
+                await incrementPage();
+            });
+
+            document.getElementById('resetButton').addEventListener('click', function () {
+                reset();
+            });
+
+            async function handleReceivedData(data) {
+                // console.log(`Received data: ${data}`); // Add this line
+                // if (data.includes("\n")) {
+                //     //passthru anything that came over the monitor even if it's not a command
+                //     console.log(`arduino: ${data}`);
+                // }
+
+                // if (pages[pageIndex].incrementCommand) {
+                //     console.log('incrementCommand');
+                //     if (data.includes(pages[pageIndex].incrementCommand)) {
+                //         console.log('incrementing page');
+                //         incrementPage();
+                //     }
+                //     return;
+                // }
+                //if data includes any of the tankStates commandFromArduinoToIncrement, use them to chaneg tank stat to state +1
+                //make an array of tankStates commandFromArduinoToIncrement
+                //if data includes uppercase letter, it's a command from arduino
+                if (/[A-Z]/.test(data)) {
+
+                    let tankStateCommands = tankStates.map(state => state.arduinoCharToEnterState);
+                    // console.log('all commands' + tankStateCommands)//all commandsE,N,F,V
+                    if (tankStateCommands.some(command => data.includes(command))) {
+                        let newState = tankStates.find(state => data.includes(state.arduinoCharToEnterState));
+                        if (newState) {
+                            tankState = newState;
+                            console.log('Received command: ' + tankState.arduinoCharToEnterState + ', so tank state is now ' + tankState.name);
+                            // if (tankState.name == 'filling' || tankState.name == 'empty' || tankState.name == 'draining') {
+                            if (pages[pageIndex].incrementCommand) {
+                                console.log('incrementCommand');
+                                if (data.includes(pages[pageIndex].incrementCommand)) {
+                                    // console.log('incrementing page from' + pages[pageIndex].name + ' to ' + pages[(pageIndex + 1) % pages.length].name);
+                                    incrementPage();
+                                }
+                            }
+                            //     incrementPage();
+                            // }
+                        } else {
+                            console.log('Received unknown command: ' + data.trim());
+                        }
+                    }
+                    if (data.includes('X')) {
+                        console.log('Received command: X, drip dropped');
+                        if (pages[pageIndex].name == 'PRE_DRIP') {
+                            incrementPage();
+                        }
+                    }
+
+                }
+            }
+            async function incrementPage() {
+                resetTimeout();
+                let page = pages[pageIndex];
+                let newPageIndex = (pageIndex + 1) % pages.length;
+
+                console.info('INCREMENT PAGE page from' + pages[pageIndex].name + ' to ' + pages[newPageIndex].name);
+                if (page.command) {
+                    sendCharOverSerial(page.command);
+                }
+                pageIndex = newPageIndex
+                updatePage();
+
+            }
+
+            function updatePage() {
+                console.info('updating page' + pageIndex);
+                let page = pages[pageIndex];
+                title.innerHTML = page.title;
+                text.innerHTML = page.text;
+                button.textContent = page.buttonText;
+                // button.style.backgroundColor = page.buttonColor;
+                button.disabled = !page.clickable;
+                image.src = 'svg/' + page.image;
+                // resetButton.disabled = page.lockout;
+                button.disabled = page.lockout;
+                document.getElementById('resetButton').style.visibility = page.resetVisible ? 'visible' : 'hidden';
+
+            }
+
+            function sendCharOverSerial(char) {
+                if (port) {
+                    console.info('sending ' + char + ' over serial to arduino');
+                    const writer = port.writable.getWriter();
+                    writer.write(new TextEncoder().encode(char));
+                    writer.releaseLock();
+                }
+                else {
+                    console.info('FAILED to send  ' + char + ' over serial');
+                }
+            }
+
+            async function readLoop(controller) {
+                while (true) {
+                    // console.log('reading');
+                    const { value, done } = await reader.read();
+                    if (value) {
+                        // console.log('Received:', new TextDecoder().decode(value));
+                        handleReceivedData(new TextDecoder().decode(value));
+                    }
+                    if (done) {
+                        reader.releaseLock();
+                        break;
+                    }
+                }
+            }
+            let timeoutId;
+
+            function resetTimeout() {
+                // Clear the existing timeout
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+
+                // Set a new timeout
+                timeoutId = setTimeout(() => {
+                    console.log('Timeout computer side');
+                    reset();
+
+                }, 55000); // 55 seconds
+            }
+
+            async function reset() {
+                // pageIndex = 0;
+                console.log('reset function called');
+                sendCharOverSerial('R\n');
+                if (tankState.name == 'full' || tankState.name == 'filling' || tankState.name == 'draining') {
+                    console.log('resetting interactive lockout, tank full');
+                    pageIndex = pages.findIndex(page => page.name == 'RESET');
+                    await sendCharOverSerial('T\n');
+                }
+                else {
+                    console.log('resetting interactive FAST, tank not full');
+                    pageIndex = pages.findIndex(page => page.name == 'READY');
+                }
+                updatePage();
+            }
+
+
+
+            /* ------------------------------------  
+            * 
+            *  Functions for Serial Connection
+            *  
+            * ------------------------------------ */
+
+            async function connectSerial() {
+                if (!navigator.serial) {
+                    updateFeedback('Serial not supported in this browser');
+                    return;
+                }
+                let connectedPort = null;
+                let readerStream = null;
+                try {
+                    addSerialListeners();
+                    updateFeedback("Aquiring serial port...");
+                    connectedPort = await openSerialPort();
+                    readerStream = await applyReaderToPort(connectedPort, handleReceivedData);
+                    // checkSignals(connectedPort);
+                    return { openPort: connectedPort, stream: readerStream };
+                } catch (err) {
+                    console.error('Could not connect to serial port: ', err);
+                    // no serial ports avaialble, follow these steps:
+                    //      Serial setup https://developer.chrome.com/docs/capabilities/serial
+                    //        Open Chrome
+                    //          - At the top right, click the 3 dots and then Settings.
+                    //          - Click Privacy and security and then Site Settings and then Additional permissions.
+                    //          - Choose your device type:
+                    //               - USB devices
+                    //               - Serial ports
+                    //               - HID devices
+                    //          To choose a default setting, select an option.
+                    displaySerialFixButton();
+                }
+            }
+
+            async function openSerialPort() {
+                // Wait for existing serial ports to be populated
+                const ports = await navigator.serial.getPorts();
+                let connectedPort = null;
+                if (ports.length <= 0) {
+                    throw "No serial ports found";
+
+                } else {
+                    updateFeedback("Serial ports are avaiable... choosing the first one to open.");
+                    connectedPort = ports[0];
+                    await connectedPort.open({ baudRate: 115200 });
+                    updateFeedback("Serial port opened successfully.");
+
+                }
+                return connectedPort
+            }
+
+            async function applyReaderToPort(openPort, callback) {
+                updateFeedback("Applying Serial Reader to Port...");
+                async function setupSerialReader(oPort, callback) {
+                    // Set up a reader to read data from the serial port
+                    // Adding this function here because it is only used by the reader:
+                    async function readLoop(controller, reader) {
+                        while (true) {
+                            // console.log('reading');
+                            const { value, done } = await reader.read();
+                            if (value) {
+                                callback(new TextDecoder().decode(value));
+                            }
+                            if (done) {
+                                reader.releaseLock();
+                                break;
+                            }
+                        }
+                    }
+                    const reader = await oPort.readable.getReader();
+                    const stream = new ReadableStream(
+                        {
+                            start(controller) {
+                                // The following function handles each data chunk
+                                readLoop(controller, reader);
+                            }
+                        }
+                    );
+                    return stream;
+                }
+
+                if (openPort) {
+                    const readerStream = await setupSerialReader(openPort, callback)
+                    updateFeedback("READY!");
+                    return readerStream;
+                } else {
+                    throw "Missing an open port.";
+                }
+            }
+            async function checkSignals(oPort) {
+                try {
+                    const signals = await oPort.getSignals();
+                    console.log('Testing Signals:', signals);
+                } catch (err) {
+                    console.log('Could not get signals from Serial Port');
+                }
+
+            }
+            function addSerialListeners() {
+                navigator.serial.addEventListener("connect", (e) => {
+                    console.log('Serial port connected');
+                    // Connect to `e.target` or add it to a list of available ports.
+                });
+                navigator.serial.addEventListener("disconnect", (e) => {
+                    console.log('Serial port disconnected');
+                    // Remove `e.target` from the list of available ports.
+                });
+            }
+
+
+            /* ------------------------------------  
+            * 
+            *  Handle console logs for serial feedback
+            *  
+            * ------------------------------------ */
+
+            function updateFeedback(message) {
+                console.log(`Serial Feedback: ${message}`);
+            }
+
+
+            /* ------------------------------------
+            * 
+            *  Display a button to allow the user to connect to a serial port
+            *  
+            * ------------------------------------ */
+
+            function displaySerialFixButton() {
+                const serialButton = createSerialButton();
+                async function handleButtonClick() {
+                    updateFeedback("Opening serial connection dialog...");
+                    const port = await navigator.serial.requestPort();
+                    if (port) {
+                        console.log('port opened');
+                        // Redo the Init function to re-establish the serial connection
+                        init();
+                        // Clean up the button
+                        serialButton.remove();
+                    }
+                }
+                serialButton.addEventListener('click', handleButtonClick);
+            }
+            function createSerialButton() {
+                console.log('---- Creating serial button ----');
+                if (document.getElementById('serialButton')) {
+                    return;
+                }
+                const serialButton = document.createElement('button');
+                serialButton.textContent = 'Press to connect first available serial port';
+                serialButton.id = 'serialButton';
+                serialButton.style.display = 'inline-block';
+                serialButton.style.position = 'absolute';
+                serialButton.style.top = '50%';
+                serialButton.style.left = '50%';
+                serialButton.style.backgroundColor = '#FF0000';
+                serialButton.style.transform = 'translate(-50%, -50%)';
+                serialButton.style.fontSize = '1.15rem';
+                serialButton.style.padding = '1rem 1rem 2rem 1rem';
+                serialButton.style.cursor = 'pointer';
+                return document.body.appendChild(serialButton);
+            }
+
+
+            /*   async function setupSerial() {
+                  if ('serial' in navigator) {
+                      const serialButton = document.createElement('button');
+                      serialButton.textContent = 'Request Serial Port, click 1st option, ok!';
+                      serialButton.style.position = 'absolute';
+                      serialButton.style.top = '50%';
+                      serialButton.style.left = '50%';
+                      serialButton.style.transform = 'translate(-50%, -50%)';
+                      serialButton.style.fontSize = '2rem';
+                      serialButton.style.padding = '1rem';
+                      serialButton.style.cursor = 'pointer';
+                      console.log('setupSerialsetupSerialsetupSerialsetupSerial');
+                      // if (!port) {
+                      title.innerHTML = 'No serial yet, please allow';
+                      //     console.log('No serial yet, please allow');
+                      //     await new Promise(resolve => setTimeout(resolve, 3000));
+                      try {
+                          const ports = await navigator.serial.getPorts();
+                          if (ports.length > 0) {
+                              port = ports[0];
+                              await port.open({ baudRate: 115200 });
+                              console.log('port ' + port + ' opened');
+                              reader = port.readable.getReader();
+                              inputStream = new ReadableStream({
+                                  start(controller) {
+                                      readLoop(controller);
+                                  }
+                              });
+                              const signals = await port.getSignals();
+                              console.log(signals);
+                              return true;
+                          }
+                      } catch (err) {
+                          console.log('No pre-authorized ports found, requesting user selection');
+                      }
+                      document.body.appendChild(serialButton);
+                      return new Promise((resolve, reject) => {
+                          serialButton.addEventListener('click', async function () {
+                              try {
+                                  port = await navigator.serial.requestPort();
+                                  await port.open({ baudRate: 115200 }); // `baudRate` was `baudrate` in previous versions.
+                                  console.log('port ' + port + ' opened');
+                                  reader = port.readable.getReader();
+                                  inputStream = new ReadableStream({
+                                      start(controller) {
+                                          readLoop(controller);
+                                      }
+                                  });
+                                  const signals = await port.getSignals();
+                                  console.log(signals);
+                                  serialButton.remove();
+                                  resolve(true);
+                              } catch (err) {
+                                  console.error('There was an error opening the serial port:', err);
+                                  reject(false);
+                              }
+                          });
+                      });
+                  } else {
+                      console.error('Web serial doesn\'t seem to be enabled in your browser. Check https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility for more info.')
+     
+                  }
+              } */
+
+            async function init() {
+                // console.log('Page Loaded, looking for ports...');
+                const { openPort, stream } = await connectSerial();
+                port = openPort;
+                console.log('Page Loaded, setupSerial done');
+                if (port) {
+                    console.log('setupResult happened!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                    reset();
+                }
+            }
+
+            window.addEventListener('load', init);
+
+        </script>
+    </body>
+
+</html>

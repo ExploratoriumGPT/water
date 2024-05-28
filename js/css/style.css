@@ -1,0 +1,116 @@
+* {
+  font-family: 'Fira Sans', sans-serif;
+  background-color: white;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  margin: 0;
+}
+
+body {
+  font-size: 3vh;
+}
+
+#text-div.hide {
+  display: none;
+}
+
+button {
+  font-weight: lighter;
+  /*457 w 40 round 189 tall*/
+  font-size: calc(113/189 * 3em);
+  border-radius: calc((40/189) * 3em);
+  height: 3em;
+  border: none;
+  background-color: var(--green1);
+  color: white;
+  cursor: pointer;
+  width: 33vw;
+
+}
+
+#resetButton {
+  background-color: var(--green5);
+  color: var(--green3);
+  cursor: pointer;
+}
+
+#resetButton:active:enabled {
+  background-color: var(--green3);
+  color: var(--green4);
+}
+
+button:disabled {
+  background-color: var(--green4);
+  color: white;
+}
+
+button:active:enabled {
+  background-color: var(--green3);
+  color: var(--green4);
+}
+
+button:active:disabled {
+  background-color: var(--green4);
+  color: white;
+}
+
+:root {
+  --green1: #2CAA61;
+  --green2: #1B894B;
+  --green3: #06592D;
+  --green4: #D8EFDD;
+  --green5: #9AD3AE;
+}
+
+
+h1 {
+  font-size: 6vh;
+}
+
+p {
+  justify-content: left;
+  align-items: left;
+  line-height: 1.4;
+  padding-right: 25vw;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+  /* grid-template-rows: auto 1fr auto; */
+  height: 100vh;
+  width: 100vw;
+  box-sizing: border-box;
+  padding-bottom: 4vh;
+  padding-top: 4vh;
+  padding-left: 4vh;
+  padding-right: 4vh;
+}
+
+#image-div {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  padding: 2vh;
+}
+
+#buttons {
+  display: flex;
+  justify-content: space-between;
+  /* gap: 10vw; */
+  /* z-index: 1000;
+  position: absolute;
+  bottom: 0;
+  left: 0; */
+}
+
+#overlay-console {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.25);
+  display: none;
+}

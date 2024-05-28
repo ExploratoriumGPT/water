@@ -26,7 +26,7 @@ async function connectSerial( serialCallback ) {
       addSerialListeners();
       updateFeedback("Aquiring serial port...");
       connectedPort = await openSerialPort();
-      readerStream = await applyReaderToPort(connectedPort, handleReceivedData);
+      readerStream = await applyReaderToPort(connectedPort, serialCallback);
       checkSignals(connectedPort);
       return { openPort: connectedPort, stream: readerStream };
   } catch (err) {
@@ -43,6 +43,8 @@ async function openSerialPort() {
       throw "No serial ports found";
 
   } else {
+
+    updateFeedback("Ports: ", ports);
       updateFeedback("Serial ports are avaiable... choosing the first one to open.");
       connectedPort = ports[0];
       await connectedPort.open({ baudRate: 115200 });
@@ -96,19 +98,31 @@ async function checkSignals(oPort) {
       const signals = await oPort.getSignals();
       console.log('Testing Signals:', signals);
   } catch (err) {
-      console.log('Could not get signals from Serial Port');
+        updateFeedback('Could not get signals from Serial Port');
   }
 }
 
 function addSerialListeners() {
   navigator.serial.addEventListener("connect", (e) => {
-      console.log('Serial port connected');
+    updateFeedback('Serial port connected');
       // Connect to `e.target` or add it to a list of available ports.
   });
   navigator.serial.addEventListener("disconnect", (e) => {
-      console.log('Serial port disconnected');
+    updateFeedback('Serial port disconnected');
       // Remove `e.target` from the list of available ports.
   });
+}
+
+function serialSend(port, char) {
+    console.info('sending ' + char + ' over serial to arduino');
+    if (port) {
+        const writer = port.writable.getWriter();
+        writer.write(new TextEncoder().encode(char));
+        writer.releaseLock();
+    }
+    else {
+        console.info('FAILED to send  ' + char + ' over serial');
+    }
 }
 
 
@@ -161,10 +175,10 @@ function createSerialButton() {
 *  
 * ------------------------------------ */
 
-function updateFeedback(message) {
-  console.log(`Serial Feedback: ${message}`);
+function updateFeedback(message, ...args) {
+  console.log(`Serial Feedback: ${message}`, args);
 }
 
 
-export { connectSerial };
+export { connectSerial, serialSend };
 
