@@ -34,9 +34,13 @@ let timeoutId;
 let serialPort;
 let largeTankState = '';
 
-// Dynamic DOM Elements
+
 const titleText = document.getElementById('title');
 const feedbackText = document.getElementById('text');
+titleText.innerHTML = "Welcome to the Earth Tank";
+feedbackText.innerHTML = "Loading...";
+
+// Dynamic DOM Elements
 const imageElement = document.getElementById('image');
 const resetButton = document.getElementById('resetButton');
 const actionButton = document.getElementById('button');
@@ -44,6 +48,7 @@ const actionButton = document.getElementById('button');
 actionButton.addEventListener('click', handleActionButtonClick);
 
 function loadPages() {
+    feedbackText.innerHTML = "Loading Pages...";
     fetch('../data/pages.json')
     .then(response => response.json())
     .then(obj => begin(obj))
@@ -224,6 +229,7 @@ function logError(message, ...args) {
 
 async function init() {
     try {
+        feedbackText.innerHTML = "Initing...";
         const { openPort, stream } = await connectSerial( handleSerialData );
         serialPort = openPort;
         logInfo('Port opened, stream ready.', serialPort, stream);
@@ -231,7 +237,7 @@ async function init() {
         
     } catch (err) {
         logError('[GC DEBUG] Error Initializing: ', err);
-
+        feedbackText.innerHTML = "Error connecting to serial port.";
     }
 }
 
