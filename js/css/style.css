@@ -11,9 +11,7 @@ body {
   font-size: 3vh;
 }
 
-#text-div.hide {
-  display: none;
-}
+
 
 button {
   font-weight: lighter;
@@ -86,6 +84,14 @@ p {
   padding-top: 4vh;
   padding-left: 4vh;
   padding-right: 4vh;
+}
+
+#text-div.show {
+  display: flex;
+}
+
+#text-div.hide {
+  display: none;
 }
 
 #image-div {

@@ -15,7 +15,7 @@
 
     <body>
         <div id="container">
-            <div id="text-div" class="hide">
+            <div id="text-div" class="show">
                 <h1 id="title">How Much Water?</h1>
                 <p id="text">I'm sorry, I am not working today. Please tell staff.</p>
             </div>
@@ -27,10 +27,10 @@
                 <button id="resetButton">Reset</button>
             </div>
         </div>
-        <div id="overlay-console" style="display:none;">
+        <div id="overlay-console" style="display:flex;">
             <h1 id="overlay-title">empty title</h1>
-            <h3 id="overlay-status" style="display:none;opacity:.25;">empty status</h3>
-            <h2 id="overlay-feedback" style="display:none;opacity:.25;">empty feedback</h2>
+            <h3 id="overlay-status" style="opacity:.5;">empty status</h3>
+            <h2 id="overlay-feedback" style="opacity:.5;">empty feedback</h2>
             <p id="overlay-serial-help-text" style="display:none;">Web serial doesn't seem to be enabled in your browser. Check the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility">WebSerial API</a> for more info.</p>
         </div>
     </body>
