@@ -3,10 +3,10 @@
       "stage":"RESET",
       "actionText":"Putting Earth's water back...",
       "graphicsPath":"svg/RESETTING.svg",
-      "resetVisible":false,
       "lockout":true,
-      "commandToSend":"",
-      "nextCommand":"E"
+      "resetVisible":false,
+      "pageLoadedCommand":"",
+      "pageIncrementCommand":"E"
    },
    {
      "stage":"READY",
@@ -14,8 +14,8 @@
      "graphicsPath":"svg/PREFILL.svg",
      "lockout":false,
      "resetVisible":false,
-     "commandToSend":"",
-     "nextCommand":""
+     "pageLoadedCommand":"",
+     "pageIncrementCommand":""
   },
   {
      "stage":"PRE_FILL",
@@ -23,18 +23,17 @@
      "graphicsPath":"svg/PREFILL.svg",
      "lockout":false,
      "resetVisible":true,
-     "commandToSend":"",
-     "nextCommand":""
+     "pageLoadedCommand":"",
+     "pageIncrementCommand":""
   },
   {
      "stage":"FILLING",
      "actionText":"Draining all Earth's water...",
      "graphicsPath":"svg/FILLING.svg",
-     "resetVisible":false,
      "lockout":true,
-     
-     "commandToSend":"F\n",
-     "nextCommand":"F"
+     "resetVisible":false,
+     "pageLoadedCommand":"F\n",
+     "pageIncrementCommand":"F"
   },
   {
      "stage":"FULL",
@@ -42,8 +41,8 @@
      "graphicsPath":"svg/POSTFILL.svg",
      "lockout":false,
      "resetVisible":true,
-     "commandToSend":"F\n",
-     "nextCommand":""
+     "pageLoadedCommand":"F\n",
+     "pageIncrementCommand":""
   },
   {
      "stage":"PRE_DRIP",
@@ -51,8 +50,8 @@
      "graphicsPath":"svg/PREDRIP.svg",
      "lockout":true,
      "resetVisible":true,
-     "commandToSend":"",
-     "nextCommand":"X"
+     "pageLoadedCommand":"",
+     "pageIncrementCommand":"X"
   },
   {
      "stage":"POST_DRIP",
@@ -60,8 +59,8 @@
      "graphicsPath":"svg/POSTDRIP.svg",
      "lockout":false,
      "resetVisible":true,
-     "commandToSend":"",
-     "nextCommand":"X"
+     "pageLoadedCommand":"",
+     "pageIncrementCommand":"X"
   },
   {
      "name":"WGO",
@@ -69,16 +68,16 @@
      "graphicsPath":"svg/WGO.svg",
      "lockout":false,
      "resetVisible":false,
-     "commandToSend":"",
-     "nextCommand":""
+     "pageLoadedCommand":"",
+     "pageIncrementCommand":""
   },
   {
      "stage":"RESET",
      "actionText":"Putting Earth's water back...",
      "graphicsPath":"svg/RESETTING.svg",
-     "resetVisible":false,
      "lockout":true,
-     "commandToSend":"R\n",
-     "nextCommand":"E"
+     "resetVisible":false,
+     "pageLoadedCommand":"R\n",
+     "pageIncrementCommand":"E"
   }
 ]
