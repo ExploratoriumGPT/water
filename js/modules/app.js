@@ -35,6 +35,8 @@ let serialPort;
 let largeTankState = '';
 
 // Dynamic DOM Elements
+const titleText = document.getElementById('title');
+const feedbackText = document.getElementById('text');
 const imageElement = document.getElementById('image');
 const resetButton = document.getElementById('resetButton');
 const actionButton = document.getElementById('button');
@@ -207,6 +209,7 @@ and the section of the code that is initiating the logging.
 */
 function logStatus(message, ...args) {
     console.log(`Status [app]: ${message}`, args);
+    titleText.textContent = message;
 }
 
 function logInfo(message, ...args) {
