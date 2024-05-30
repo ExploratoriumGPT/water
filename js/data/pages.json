@@ -13,7 +13,7 @@
       "actionText": "Drain the Earth",
       "graphicsPath": "svg/PREFILL.svg",
       "lockout": false,
-      "resetVisible": true,
+      "resetVisible": false,
       "pageLoadedCommand": "",
       "pageIncrementCommand": ""
    },
@@ -41,7 +41,7 @@
       "graphicsPath": "svg/PREDRIP.svg",
       "lockout": true,
       "resetVisible": true,
-      "pageLoadedCommand": "",
+      "pageLoadedCommand": "D\n",
       "pageIncrementCommand": "X"
    },
    {

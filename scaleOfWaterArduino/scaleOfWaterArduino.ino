@@ -49,12 +49,14 @@ void loop()
 	handSensorPoll();
 	pollSerial();
 	// timeout();
-	if (largeTankState == FULL && millis() - lastLittleDropDispense > minimumLittleDropInterval)
-	{
-		// little drp lockout
-		changeHandDropButtonLightState(HIGH);
-		handDropLockOut = false;
-	}
+
+	// if (largeTankState == FULL && millis() - lastLittleDropDispense > minimumLittleDropInterval)
+	// {
+	// 	// little drp lockout
+	// 	changeHandDropButtonLightState(HIGH);
+	// 	handDropLockOut = false;
+	// }
+
 	// testDrain();
 	// testSumpPump();
 	// testStepperDispense();
@@ -63,8 +65,7 @@ void loop()
 
 void pollSerial()
 {
-	// if serrial command F is received, and trank is empty, fill tank
-	// if serial command D is received, and tank is full, give a drop
+	// if serial command F is received, and tank is empty, fill tank
 	if (Serial.available() > 0)
 	{
 		char inChar = Serial.read();
@@ -73,11 +74,11 @@ void pollSerial()
 			Serial << "filling tank" << endl;
 			sumpPumpDispense();
 		}
-		// else if (inChar == 'D' && largeTankState == FULL)
-		// {
-		// 	Serial << "dispensing hand drop" << endl;
-		// 	stepperDispense();
-		// }
+		else if (inChar == 'D' && largeTankState == FULL)
+		{
+			Serial << "hand drop mode enabled by PC" << endl;
+			handDropLockOut = false;
+		}
 		else if (inChar == 'R' && largeTankState == FULL)
 		{
 			resetSystem();
@@ -207,6 +208,7 @@ void resetSystem()
 {
 	changeBigDropButtonLightState(LOW);
 	changeHandDropButtonLightState(LOW);
+	handDropLockOut = true;
 	drainTank();
 }
 
