@@ -33,14 +33,16 @@ let currentStep = 0;
 let timeoutId;
 let serialPort;
 let largeTankState = '';
+let startupStatus = true;
 
 
 const titleText = document.getElementById('overlay-title');
 const statusText = document.getElementById('overlay-status');
 const feedbackText = document.getElementById('overlay-feedback');
-
 titleText.innerHTML = "JavaScript Starting...";
 statusText.innerHTML = "Loading...";
+
+
 
 // Dynamic DOM Elements
 const imageElement = document.getElementById('image');
@@ -49,9 +51,11 @@ const actionButton = document.getElementById('button');
 
 actionButton.addEventListener('click', handleActionButtonClick);
 
+console.log(window.location.href);
+
 function loadPages() {
     logInfo("Loading Pages...");
-    fetch('/js/data/pages.json')
+    fetch('./data/pages.json')
     .then(response => response.json())
     .then(obj => begin(obj))
     .catch(error => {
@@ -64,6 +68,7 @@ function begin(obj) {
     logInfo("Begin");
     pages = obj;
     updatePage( currentStep );
+    displayStartupStatus(3);
 }
 
 function incrementPage() {
@@ -73,6 +78,14 @@ function incrementPage() {
 }
 
 function updatePage( pageIndex ) {
+    if (pageIndex == 2) {
+        displayStartupStatus(4);
+    }
+    if ( startupStatus ){
+        // if we made it here, we are past the startup sequence.
+        displayStartupStatus(10);
+        startupStatus = false;
+    }
     const nextPage = pages[pageIndex];
     logStatus(nextPage.stage);
     
@@ -115,8 +128,10 @@ function handleActionButtonClick() {
 }
 
 document.addEventListener('serialready', handleSerialReady);
+
 function handleSerialReady(event) {
     logInfo('Serial Ready Event: ', event);
+    displayStartupStatus(2);
     serialPort = event.detail.port;
     loadPages();
 }
@@ -228,13 +243,77 @@ function logError(message, ...args) {
     console.error(`Error [app]: ${message}`, ...args);
 }
 
+
+/*
+
+    Start Up Status Display
+
+    - Display a list of steps on the screen that can aid debugging.
+    - This only displayed on startup.
+    - Let's the admin know at what stage the app is at when and if it fails.
+
+*/
+
+function displayStartupStatus(step) {
+    const step1 = document.querySelector('#load-sequence .step-1');
+    const step2 = document.querySelector('#load-sequence .step-2');
+    const step3 = document.querySelector('#load-sequence .step-3');
+    const step4 = document.querySelector('#load-sequence .step-4');
+    const step5 = document.querySelector('#load-sequence .step-5');
+
+    switch (step) {
+        case 1:
+        logInfo('JAvaScript loaded');
+        step1.classList.remove("wait");
+        step1.classList.add("check");
+        break;
+        
+        case 2:
+        logInfo('Connected to Serial Port');
+        step2.classList.remove("wait");
+        step2.classList.add("check");
+        break;
+        
+        case 3:
+        logInfo('Pages Loaded');
+        step3.classList.remove("wait");
+        step3.classList.add("check");
+        break;
+        
+        case 4:
+        logInfo('Tank Reset');
+        step4.classList.remove("wait");
+        step4.classList.add("check");
+        break;
+
+        case 5:
+        logInfo('Ready');
+        step5.classList.remove("wait");
+        step5.classList.add("check");
+        break;
+
+        case 10:
+        logInfo('Removing Startup List');
+        const loadSequence = document.getElementById('load-sequence');
+        loadSequence.classList.remove("show");
+        loadSequence.classList.add("hide");
+        break;
+        
+        default:
+        logInfo('Unknown Step');
+    }
+}
+
+
 // Initialize the app
 
 async function init() {
+    displayStartupStatus(1);
     try {
         feedbackText.innerHTML = "Initing...";
         const { openPort, stream } = await connectSerial( handleSerialData );
         serialPort = openPort;
+        displayStartupStatus(2);
         logInfo('Port opened, stream ready.', serialPort, stream);
         loadPages();
         
