@@ -50,59 +50,60 @@ const resetButton = document.getElementById('resetButton');
 const actionButton = document.getElementById('button');
 
 actionButton.addEventListener('click', handleActionButtonClick);
+resetButton.addEventListener('click', reset);
 
 console.log(window.location.href);
 
 function loadPages() {
     logInfo("Loading Pages...");
     fetch('./data/pages.json')
-    .then(response => response.json())
-    .then(obj => begin(obj))
-    .catch(error => {
-        // Handle any errors that occurred during the fetch
-        console.error('Fetch error:', error);
-    });
+        .then(response => response.json())
+        .then(obj => begin(obj))
+        .catch(error => {
+            // Handle any errors that occurred during the fetch
+            console.error('Fetch error:', error);
+        });
 }
 
 function begin(obj) {
     logInfo("Begin");
     pages = obj;
-    updatePage( currentStep );
+    updatePage(currentStep);
     displayStartupStatus(3);
 }
 
 function incrementPage() {
     currentStep++;
     logInfo(`---- Increment page #${currentStep} ---- `);
-    updatePage( currentStep );
+    updatePage(currentStep);
 }
 
-function updatePage( pageIndex ) {
+function updatePage(pageIndex) {
     if (pageIndex == 2) {
         displayStartupStatus(4);
     }
-    if ( startupStatus ){
+    if (startupStatus) {
         // if we made it here, we are past the startup sequence.
         displayStartupStatus(10);
         startupStatus = false;
     }
     const nextPage = pages[pageIndex];
     logStatus(nextPage.stage);
-    
+
     logInfo("Updating page: ", nextPage);
     logInfo(`This page has an increment command of: ${nextPage.pageIncrementCommand}`);
-    
+
     // Image
     imageElement.src = nextPage.graphicsPath;
-    
-    if ( nextPage.pageLoadedCommand !== undefined && nextPage.pageLoadedCommand !== "") {
-        serialSend( serialPort, nextPage.pageLoadedCommand );
+
+    if (nextPage.pageLoadedCommand !== undefined && nextPage.pageLoadedCommand !== "") {
+        serialSend(serialPort, nextPage.pageLoadedCommand);
     }
-    
+
     // Button
     actionButton.textContent = nextPage.actionText;
     actionButton.disabled = nextPage.lockout;
-    if (nextPage.resetVisible){
+    if (nextPage.resetVisible) {
         resetButton.style.visibility = 'visible';
         resetButton.disabled = nextPage.lockout;
     } else {
@@ -137,55 +138,55 @@ function handleSerialReady(event) {
 }
 
 function handleSerialData(data) {
-    logInfo(`Raw data:: ${data}` );
+    logInfo(`Raw data:: ${data}`);
     const oneLetterData = `${/[A-Z]/.exec(data)}`;
     if (!oneLetterData || oneLetterData == 'null') {
         // logInfo(`Received:  No useful data ${data}` );
         return;
-    }   
+    }
     logInfo(`Received ${oneLetterData}, ${pages[currentStep].pageIncrementCommand} will trigger page increment.`);
     // Assume data is formatted as a single character command:
-    switch ( oneLetterData ){
+    switch (oneLetterData) {
         case "N":
-        largeTankState = 'N';
-        logInfo(`Assuming earth tank is filling... Do nothing here`);
-        break;
-        
+            largeTankState = 'N';
+            logInfo(`Assuming earth tank is filling... Do nothing here`);
+            break;
+
         case "F":
-        largeTankState = 'F';
-        logInfo(`FULL, ready to drain. Incrementing page.`);  
-        incrementPage();
-        break; 
-        
+            largeTankState = 'F';
+            logInfo(`FULL, ready to drain. Incrementing page.`);
+            incrementPage();
+            break;
+
         case "V":
-        largeTankState = 'V';
-        logInfo(`Assuming earth tank is draining... Do nothing here`);
-        break;
-        
+            largeTankState = 'V';
+            logInfo(`Assuming earth tank is draining... Do nothing here`);
+            break;
+
         case "E":
-        largeTankState = 'E';
-        logInfo(`Assuming earth tank is empty... increment page if needed`);
-        if ( pages[currentStep].pageIncrementCommand == 'E' ) {
-            incrementPage();
-        }
-        break;
-        
+            largeTankState = 'E';
+            logInfo(`Assuming earth tank is empty... increment page if needed`);
+            if (pages[currentStep].pageIncrementCommand == 'E') {
+                incrementPage();
+            }
+            break;
+
         case "X":
-        largeTankState = 'X';
-        logInfo(`Actively dripping:: `, pages[currentStep].stage);
-        resetTimeout();
-        if (pages[currentStep].stage == 'PRE_DRIP') {
-            incrementPage();
-        }
-        break;
-        
+            largeTankState = 'X';
+            logInfo(`Actively dripping:: `, pages[currentStep].stage);
+            resetTimeout();
+            if (pages[currentStep].stage == 'PRE_DRIP') {
+                incrementPage();
+            }
+            break;
+
         case "D":
-        largeTankState = 'D';
-        logInfo(`Actively dripping [Possibly Unused Stage]:: `, pages[currentStep].stage);
-        break;
-        
+            largeTankState = 'D';
+            logInfo(`Actively dripping [Possibly Unused Stage]:: `, pages[currentStep].stage);
+            break;
+
         default:
-        logInfo(`Received unexpected data: ${oneLetterData}`);
+            logInfo(`Received unexpected data: ${oneLetterData}`);
     }
 }
 
@@ -214,7 +215,7 @@ async function reset(reason) {
         serialSend(serialPort, 'R\n');
         currentStep = 0;
     }
-    updatePage( currentStep );
+    updatePage(currentStep);
 }
 
 /* 
@@ -263,44 +264,44 @@ function displayStartupStatus(step) {
 
     switch (step) {
         case 1:
-        logInfo('JAvaScript loaded');
-        step1.classList.remove("wait");
-        step1.classList.add("check");
-        break;
-        
+            logInfo('JAvaScript loaded');
+            step1.classList.remove("wait");
+            step1.classList.add("check");
+            break;
+
         case 2:
-        logInfo('Connected to Serial Port');
-        step2.classList.remove("wait");
-        step2.classList.add("check");
-        break;
-        
+            logInfo('Connected to Serial Port');
+            step2.classList.remove("wait");
+            step2.classList.add("check");
+            break;
+
         case 3:
-        logInfo('Pages Loaded');
-        step3.classList.remove("wait");
-        step3.classList.add("check");
-        break;
-        
+            logInfo('Pages Loaded');
+            step3.classList.remove("wait");
+            step3.classList.add("check");
+            break;
+
         case 4:
-        logInfo('Tank Reset');
-        step4.classList.remove("wait");
-        step4.classList.add("check");
-        break;
+            logInfo('Tank Reset');
+            step4.classList.remove("wait");
+            step4.classList.add("check");
+            break;
 
         case 5:
-        logInfo('Ready');
-        step5.classList.remove("wait");
-        step5.classList.add("check");
-        break;
+            logInfo('Ready');
+            step5.classList.remove("wait");
+            step5.classList.add("check");
+            break;
 
         case 10:
-        logInfo('Removing Startup List');
-        const loadSequence = document.getElementById('load-sequence');
-        loadSequence.classList.remove("show");
-        loadSequence.classList.add("hide");
-        break;
-        
+            logInfo('Removing Startup List');
+            const loadSequence = document.getElementById('load-sequence');
+            loadSequence.classList.remove("show");
+            loadSequence.classList.add("hide");
+            break;
+
         default:
-        logInfo('Unknown Step');
+            logInfo('Unknown Step');
     }
 }
 
@@ -311,12 +312,12 @@ async function init() {
     displayStartupStatus(1);
     try {
         feedbackText.innerHTML = "Initing...";
-        const { openPort, stream } = await connectSerial( handleSerialData );
+        const { openPort, stream } = await connectSerial(handleSerialData);
         serialPort = openPort;
         displayStartupStatus(2);
         logInfo('Port opened, stream ready.', serialPort, stream);
         loadPages();
-        
+
     } catch (err) {
         logError('[GC DEBUG] Error Initializing: ', err);
         feedbackText.innerHTML = "Error connecting to serial port.";

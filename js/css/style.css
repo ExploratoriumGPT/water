@@ -1,6 +1,6 @@
 * {
   font-family: 'Fira Sans', sans-serif;
-  background-color: white;
+  /* background-color: white; */
   overflow: hidden;
   touch-action: none;
   user-select: none;
@@ -11,23 +11,47 @@ body {
   font-size: 3vh;
 }
 
+
+
+
+#buttons {
+  position: absolute;
+  bottom: 97px;
+  left: 100px;
+  right: 100px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 45px;
+  font-weight: medium;
+
+}
+
+
 button {
-  font-weight: lighter;
-  /*457 w 40 round 189 tall*/
-  font-size: calc(113/189 * 3em);
-  border-radius: calc((40/189) * 3em);
-  height: 3em;
+  font-size: 45px;
+  border-radius: 25px;
+  font-weight: bolder;
+
+  width: calc((425/1280)*100vw);
+  height: calc((127/1024)*100vh);
   border: none;
   background-color: var(--green1);
   color: white;
   cursor: pointer;
-  width: 33vw;
+  left: 0;
 }
 
 #resetButton {
-  background-color: var(--green5);
+  font-size: 45px;
+  font-weight: bolder;
+  border-radius: 25px;
+  background-color: white;
   color: var(--green3);
+  border: 4px solid var(--green3);
   cursor: pointer;
+  width: calc((200/1280)*100vw);
+  height: calc((93/1024)*100vh);
+  align-self: flex-end;
 }
 
 #resetButton:active:enabled {
@@ -49,6 +73,28 @@ button:active:disabled {
   background-color: var(--green4);
   color: white;
 }
+
+:root {
+  --green1: #2CAA61;
+  --green2: #1B894B;
+  --green3: #06592D;
+  --green4: #D8EFDD;
+  --green5: #9AD3AE;
+}
+
+
+#image-div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image: url('path/to/your/image.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 
 :root {
   --green1: #2CAA61;
@@ -91,7 +137,7 @@ p {
   display: none;
 }
 
-#image-div {
+/* #image-div {
   display: flex;
   flex: 1;
   overflow: hidden;
@@ -102,13 +148,13 @@ p {
   display: flex;
   justify-content: space-between;
   /* gap: 10vw; */
-  /* z-index: 1000;
+/* z-index: 1000;
   position: absolute;
   bottom: 0;
   left: 0; */
 }
 
-#load-sequence {
+*/ #load-sequence {
   display: flex;
   flex-direction: column;
 }

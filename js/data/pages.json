@@ -1,12 +1,12 @@
 [
    {
-      "stage":"RESET",
-      "actionText":"Putting Earth's water back...",
-      "graphicsPath":"svg/RESETTING.svg",
-      "lockout":true,
-      "resetVisible":false,
-      "pageLoadedCommand":"",
-      "pageIncrementCommand":"E"
+      "stage": "RESET",
+      "actionText": "Putting Earth's water back...",
+      "graphicsPath": "svg/RESETTING.svg",
+      "lockout": true,
+      "resetVisible": false,
+      "pageLoadedCommand": "",
+      "pageIncrementCommand": "E"
    },
    {
      "stage":"READY",
