@@ -35,10 +35,12 @@ let serialPort;
 let largeTankState = '';
 
 
-const titleText = document.getElementById('title');
-const feedbackText = document.getElementById('text');
-titleText.innerHTML = "Welcome to the Earth Tank";
-feedbackText.innerHTML = "Loading...";
+const titleText = document.getElementById('overlay-title');
+const statusText = document.getElementById('overlay-status');
+const feedbackText = document.getElementById('overlay-feedback');
+
+titleText.innerHTML = "JavaScript Starting...";
+statusText.innerHTML = "Loading...";
 
 // Dynamic DOM Elements
 const imageElement = document.getElementById('image');
@@ -48,8 +50,8 @@ const actionButton = document.getElementById('button');
 actionButton.addEventListener('click', handleActionButtonClick);
 
 function loadPages() {
-    feedbackText.innerHTML = "Loading Pages...";
-    fetch('../data/pages.json')
+    logInfo("Loading Pages...");
+    fetch('/js/data/pages.json')
     .then(response => response.json())
     .then(obj => begin(obj))
     .catch(error => {
@@ -59,9 +61,9 @@ function loadPages() {
 }
 
 function begin(obj) {
+    logInfo("Begin");
     pages = obj;
     updatePage( currentStep );
-    // resetTimeout();
 }
 
 function incrementPage() {
@@ -116,6 +118,7 @@ document.addEventListener('serialready', handleSerialReady);
 function handleSerialReady(event) {
     logInfo('Serial Ready Event: ', event);
     serialPort = event.detail.port;
+    loadPages();
 }
 
 function handleSerialData(data) {
@@ -129,23 +132,23 @@ function handleSerialData(data) {
     // Assume data is formatted as a single character command:
     switch ( oneLetterData ){
         case "N":
-            largeTankState = 'N';
+        largeTankState = 'N';
         logInfo(`Assuming earth tank is filling... Do nothing here`);
         break;
         
         case "F":
-            largeTankState = 'F';
+        largeTankState = 'F';
         logInfo(`FULL, ready to drain. Incrementing page.`);  
         incrementPage();
         break; 
         
         case "V":
-            largeTankState = 'V';
+        largeTankState = 'V';
         logInfo(`Assuming earth tank is draining... Do nothing here`);
         break;
         
         case "E":
-            largeTankState = 'E';
+        largeTankState = 'E';
         logInfo(`Assuming earth tank is empty... increment page if needed`);
         if ( pages[currentStep].pageIncrementCommand == 'E' ) {
             incrementPage();
@@ -153,7 +156,7 @@ function handleSerialData(data) {
         break;
         
         case "X":
-            largeTankState = 'X';
+        largeTankState = 'X';
         logInfo(`Actively dripping:: `, pages[currentStep].stage);
         resetTimeout();
         if (pages[currentStep].stage == 'PRE_DRIP') {
@@ -162,12 +165,11 @@ function handleSerialData(data) {
         break;
         
         case "D":
-            largeTankState = 'D';
+        largeTankState = 'D';
         logInfo(`Actively dripping [Possibly Unused Stage]:: `, pages[currentStep].stage);
         break;
         
         default:
-        // Data is not formatted as expected, ignore.
         logInfo(`Received unexpected data: ${oneLetterData}`);
     }
 }
@@ -196,7 +198,6 @@ async function reset(reason) {
         logInfo('Tank is full, draining...');
         serialSend(serialPort, 'R\n');
         currentStep = 0;
-    
     }
     updatePage( currentStep );
 }
@@ -205,24 +206,26 @@ async function reset(reason) {
 
 Logging
 
-Why go through the trouble of creating logging functions?
-- Logging functions provide a consistent way to log messages.
-- They can be turned off or modified easily.
-- They can be used to add more information like timestamps 
-and the section of the code that is initiating the logging.
+    Why go through the trouble of creating logging functions?
+
+    - Logging functions provide a consistent way to log messages.
+    - They can be turned off or modified easily.
+    - They can be used to add more information like timestamps 
+    and the section of the code that is initiating the logging.
 
 */
 function logStatus(message, ...args) {
     console.log(`Status [app]: ${message}`, args);
-    titleText.textContent = message;
+    statusText.textContent = message;
 }
 
 function logInfo(message, ...args) {
     console.log(`Info [app]: ${message}`, args);
+    feedbackText.textContent = `${feedbackText.textContent}<br>${message}`;
 }
 
 function logError(message, ...args) {
-    console.error(`Error [app]: ${message}`, args);
+    console.error(`Error [app]: ${message}`, ...args);
 }
 
 // Initialize the app

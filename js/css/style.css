@@ -11,8 +11,6 @@ body {
   font-size: 3vh;
 }
 
-
-
 button {
   font-weight: lighter;
   /*457 w 40 round 189 tall*/
@@ -24,7 +22,6 @@ button {
   color: white;
   cursor: pointer;
   width: 33vw;
-
 }
 
 #resetButton {
@@ -118,5 +115,41 @@ p {
   width: 400px;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.25);
+  padding: 20px;
+}
+
+#overlay-title {
+  display: flex;
+  justify-content: left;
+  align-items: flex-start;
+  font-size: 1rem;
+  margin: 0 0 10px 0;
+  background-color: transparent;
+}
+
+#overlay-status {
+  display: flex;
+  justify-content: left;
+  align-items: flex-start;
+  font-size: 1rem;
+  text-transform: capitalize;
+  margin: 0 0 30px 0;
+  background-color: transparent;
+}
+
+#overlay-feedback {
+  display: flex;
+  justify-content: left;
+  align-items: flex-start;
+  font-size: 1rem;
+  background-color: transparent;
+}
+
+#overlay-console.show {
+  display: flex;
+  flex-direction: column;
+}
+
+#overlay-console.hide {
   display: none;
 }
