@@ -63,7 +63,7 @@
      "pageIncrementCommand":"X"
   },
   {
-     "name":"WGO",
+     "stage":"WGO",
      "actionText":"Reset",
      "graphicsPath":"svg/WGO.svg",
      "lockout":false,
