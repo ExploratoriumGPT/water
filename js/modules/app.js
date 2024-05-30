@@ -101,8 +101,9 @@ function updatePage(pageIndex) {
     }
 
     // Button
-    actionButton.textContent = nextPage.actionText;
+    actionButton.innerHTML = nextPage.actionText;
     actionButton.disabled = nextPage.lockout;
+    actionButton.style.visibility = nextPage.mainButtonVisible ? 'visible' : 'hidden';
     if (nextPage.resetVisible) {
         resetButton.style.visibility = 'visible';
         resetButton.disabled = nextPage.lockout;
@@ -110,6 +111,7 @@ function updatePage(pageIndex) {
         resetButton.style.visibility = 'hidden';
         resetButton.disabled = nextPage.lockout;
     }
+
 }
 
 /*
@@ -122,9 +124,12 @@ Actions that are triggered at unpredictable times.
 - Serial data events.
 
 */
-
+let buttonTimeout = false;
 function handleActionButtonClick() {
     resetTimeout();
+    if (buttonTimeout) return;
+    buttonTimeout = true;
+    setTimeout(() => buttonTimeout = false, 500);
     incrementPage();
 }
 

@@ -1,10 +1,11 @@
 [
    {
       "stage": "RESET",
-      "actionText": "Putting Earth's water back...",
+      "actionText": "Putting Earth's<br>water back...",
       "graphicsPath": "svg/RESETTING.svg",
       "lockout": true,
       "resetVisible": false,
+      "mainButtonVisible": true,
       "pageLoadedCommand": "",
       "pageIncrementCommand": "E"
    },
@@ -14,42 +15,47 @@
       "graphicsPath": "svg/PREFILL.svg",
       "lockout": false,
       "resetVisible": false,
+      "mainButtonVisible": true,
       "pageLoadedCommand": "",
       "pageIncrementCommand": ""
    },
    {
       "stage": "FILLING",
-      "actionText": "Draining all Earth's water...",
+      "actionText": "Draining all<br>Earth's water...",
       "graphicsPath": "svg/FILLING.svg",
       "lockout": true,
       "resetVisible": false,
+      "mainButtonVisible": true,
       "pageLoadedCommand": "F\n",
       "pageIncrementCommand": "F"
    },
    {
       "stage": "FULL",
-      "actionText": "What about fresh water?",
+      "actionText": "What about<br>fresh water?",
       "graphicsPath": "svg/POSTFILL.svg",
       "lockout": false,
       "resetVisible": true,
+      "mainButtonVisible": true,
       "pageLoadedCommand": "F\n",
       "pageIncrementCommand": ""
    },
    {
       "stage": "PRE_DRIP",
-      "actionText": "Put your hand under sink",
+      "actionText": "Put your hand<br>under sink",
       "graphicsPath": "svg/PREDRIP.svg",
       "lockout": true,
       "resetVisible": true,
+      "mainButtonVisible": true,
       "pageLoadedCommand": "D\n",
       "pageIncrementCommand": "X"
    },
    {
       "stage": "POST_DRIP",
-      "actionText": "What's going on?",
+      "actionText": "What's<br>going on?",
       "graphicsPath": "svg/POSTDRIP.svg",
       "lockout": false,
       "resetVisible": true,
+      "mainButtonVisible": true,
       "pageLoadedCommand": "",
       "pageIncrementCommand": "X"
    },
@@ -58,16 +64,18 @@
       "actionText": "Reset",
       "graphicsPath": "svg/WGO.svg",
       "lockout": false,
-      "resetVisible": false,
+      "mainButtonVisible": false,
+      "resetVisible": true,
       "pageLoadedCommand": "",
       "pageIncrementCommand": ""
    },
    {
       "stage": "RESET",
-      "actionText": "Putting Earth's water back...",
+      "actionText": "Putting Earth's<br>water back...",
       "graphicsPath": "svg/RESETTING.svg",
       "lockout": true,
       "resetVisible": false,
+      "mainButtonVisible": true,
       "pageLoadedCommand": "R\n",
       "pageIncrementCommand": "E"
    }
