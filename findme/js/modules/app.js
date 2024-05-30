@@ -86,10 +86,10 @@ function updatePage( pageIndex ) {
         displayStartupStatus(10);
         startupStatus = false;
     }
-    
+
     const nextPage = pages[pageIndex];
+
     logStatus(nextPage.stage);
-    
     logInfo("Updating page: ", nextPage);
     logInfo(`This page has an increment command of: ${nextPage.pageIncrementCommand}`);
     
@@ -207,6 +207,13 @@ function clearTheTimeout() {
 
 async function reset(reason) {
     logInfo(`reset function called: ${reason}, tank state: ${largeTankState}`);
+    /*
+        The tank state is included here because the Arduino 
+        does not start a reset if the tank is already empty.
+
+        This is meant to skip the reset if the tank is already empty.
+        The forces a currentStep change to step 2, the ready state.
+    */
     if (largeTankState == 'E') {
         logInfo('Tank already empty, ready for next visitor.');
         currentStep = 1;
@@ -256,6 +263,9 @@ function logError(message, ...args) {
 */
 
 function displayStartupStatus(step) {
+    if ( !startupStatus ) {
+        return;
+    }
     const step1 = document.querySelector('#load-sequence .step-1');
     const step2 = document.querySelector('#load-sequence .step-2');
     const step3 = document.querySelector('#load-sequence .step-3');
