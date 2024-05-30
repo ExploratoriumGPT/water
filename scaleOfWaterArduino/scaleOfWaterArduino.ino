@@ -184,7 +184,7 @@ void buttonPoll()
 void stepperDispense()
 {
 	Serial.println('X'); // tell the computer the drop is dripped
-	handDropLockOut = true;
+	// handDropLockOut = true;
 	changeHandDropButtonLightState(LOW);
 	lastLittleDropDispense = millis();
 	handDropStepper.enable(); // Enable the stepper motor outputs
