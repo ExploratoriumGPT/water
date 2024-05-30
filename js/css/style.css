@@ -45,13 +45,13 @@ button {
   font-size: 45px;
   font-weight: bolder;
   border-radius: 25px;
-  background-color: var(--green5);
+  background-color: white;
   color: var(--green3);
+  border: 4px solid var(--green3);
   cursor: pointer;
   width: calc((200/1280)*100vw);
   height: calc((93/1024)*100vh);
   align-self: flex-end;
-
 }
 
 #resetButton:active:enabled {
