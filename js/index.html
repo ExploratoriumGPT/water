@@ -15,9 +15,16 @@
 
     <body>
         <div id="container">
-            <div id="text-div" class="show">
+            <div id="text-div" class="hide not-needed">
                 <h1 id="title">How Much Water?</h1>
                 <p id="text">I'm sorry, I am not working today. Please tell staff.</p>
+            </div>
+            <div id="load-sequence" class="show">
+                <p class="step-1 wait">Loading JavaScript</p>
+                <p class="step-2 wait">Opening Serial Port</p>
+                <p class="step-3 wait">Loading JSON</p>
+                <p class="step-4 wait">Resetting Tank</p>
+                <p class="step-5 wait">Ready!</p>
             </div>
             <div id="image-div">
                 <img id="image" src="">
@@ -27,11 +34,10 @@
                 <button id="resetButton">Reset</button>
             </div>
         </div>
-        <div id="overlay-console" style="display:none;">
+        <div id="overlay-console" class="hide not-needed">
             <h1 id="overlay-title">empty title</h1>
-            <h3 id="overlay-status" style="opacity:.5;">empty status</h3>
-            <h2 id="overlay-feedback" style="opacity:.5;">empty feedback</h2>
-            <p id="overlay-serial-help-text" style="display:none;">Web serial doesn't seem to be enabled in your browser. Check the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility">WebSerial API</a> for more info.</p>
+            <h2 id="overlay-status">empty status</h2>
+            <h3 id="overlay-feedback">empty feedback</h3>
         </div>
     </body>
 

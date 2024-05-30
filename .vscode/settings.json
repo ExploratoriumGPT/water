@@ -4,5 +4,5 @@
         "reportMissingModuleSource": "none",
         "reportShadowedImports": "none"
     },
-    "liveServer.settings.root": "/js"
+    "liveServer.settings.root": "/"
 }
