@@ -11,7 +11,7 @@
    },
    {
       "stage": "PRE_FILL",
-      "actionText": "Drain the Earth",
+      "actionText": "See how<br>much water",
       "graphicsPath": "svg/PREFILL.svg",
       "lockout": false,
       "resetVisible": false,
@@ -21,7 +21,7 @@
    },
    {
       "stage": "FILLING",
-      "actionText": "Draining all<br>Earth's water...",
+      "actionText": "Filling with<br>Earth's water...",
       "graphicsPath": "svg/FILLING.svg",
       "lockout": true,
       "resetVisible": false,
